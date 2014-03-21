@@ -42,7 +42,6 @@ bankmodel = function (input) {
     #--------------------------#
       
       #-----------------#
-      # FOR LOAN LOSS RESERVE
       # find P(default) and then the probability that the bank gets 
       # paid by either the bank or the LLR (= ev.pmt)
       # since this is expected value, I can treat LSR (the fraction the bank must pay) as a proability
