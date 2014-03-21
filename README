@@ -1,3 +1,5 @@
+Patricia Levi, 3/2014
+
 there are two models contained in this file
 
 model one consists of model1.R and model_initialize.R
@@ -5,3 +7,5 @@ model one consists of model1.R and model_initialize.R
 model two also has a model file and an initialize file, both of which have 'bank_hurdle' in the name. it also uses the newton_solve.r file
 
 both models draw on the excel_finance_functions.r file, which provides some basic excel-like functions
+
+
