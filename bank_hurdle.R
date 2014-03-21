@@ -32,7 +32,7 @@ bankmodel = function (input) {
     #----------------------------------#
     bank.hurdle.mo = input$bank.hurdle[i]/12
     user.discount.mo = input$user.discount[i]/12
-    gvt.discount.mo = input$gvt.discount[i]/12 # doesnt really matter as long as all gvt payment are upfront
+    gvt.discount.mo = input$gvt.discount[i]/12 # used for LLR opportunity cost
     npmt = input$tenor[i]*12 # number of payments over tenor of loan    
     
     #--------------------------#
@@ -102,7 +102,7 @@ bankmodel = function (input) {
     # and net present value #
     # account for interest-rate buydown, upfront rebate
     #------------------------------#
-    interest.user = round(interest.rate - input$interest.buydown[i],4)
+    interest.user = interest.rate - input$interest.buydown[i]
     interest.user.mo = interest.user/12
     loan.payment.user = - pmt(interest.user.mo,nper=npmt,pv=loan.amt)
       
@@ -131,14 +131,14 @@ bankmodel = function (input) {
 
       #-------------------
       # LOAN LOSS RESERVE COST
-#!# /////////////// incorporate opportunity cost of LLR into gvt NPV /////////////////////
+      # incorporate opportunity cost of LLR into gvt NPV
       # assume that alternative would be to invest the LLR
       # in a set of projects that pay interest at rate r, monthly
-      pmts = reserve.size*gvt.discount.mo
-      llr.opp.cost = pmts * (1-(1+gvt.discount.mo)^-npmt)*gvt.discount.mo #discounted stream of interest on the llr
+#      pmts = reserve.size*gvt.discount.mo
+#      llr.opp.cost = pmts * (1-(1+gvt.discount.mo)^-npmt)*gvt.discount.mo #discounted stream of interest on the llr
       
     
-    gvt.cost.NPV = buydown.NPV.gvt - input$upfront.rebate[i] - llr.opp.cost - reserve.size
+    gvt.cost.NPV = buydown.NPV.gvt - input$upfront.rebate[i] - reserve.size #- llr.opp.cost 
      
     
     #---------------------------------#
@@ -165,7 +165,7 @@ bankmodel = function (input) {
       loan.NPV.bank = sum((1-cum.default.chance) * PV.payment)
       
     }
-    
+#!# /////////////// NB: Doesn't account for value of LLR... ////////////////    
     bank.NPV = loan.NPV.bank - loan.amt
         
     
@@ -176,7 +176,7 @@ bankmodel = function (input) {
     output[i,"bank.NPV"]=bank.NPV
     output[i,"gvt.cost.NPV"]=gvt.cost.NPV
     output[i,"gvt.reserve.size"]=reserve.size
-    output[i,"gvt.llr.oppcost"]=llr.opp.cost
+ #   output[i,"gvt.llr.oppcost"]=llr.opp.cost
     output[i,"interest.user"]=interest.user
     output[i,"loan.payment.user"]=loan.payment.user
     output[i,"simple.payback.yrs"]=simple.payback

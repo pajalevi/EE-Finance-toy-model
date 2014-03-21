@@ -46,7 +46,7 @@ source('W:\\Research\\Energy Efficiency\\EE Finance toy model\\excel_finance_fun
   #----------------#
   # financing info #
   #----------------#
-    tenor = seq(5,15,by=5)#15 #loan tenor
+    tenor = 10# seq(5,15,by=5)#15 #loan tenor
     loan.frac = 1# fraction of eecost covered by loan     
     chance.full.loss = 0.05 # i.e. default chance
 
@@ -54,22 +54,22 @@ source('W:\\Research\\Energy Efficiency\\EE Finance toy model\\excel_finance_fun
   # other info #
   #------------#
     bank.hurdle = 0.0515 #cost of capital http://pages.stern.nyu.edu/~adamodar/New_Home_Page/datafile/wacc.htm #.0075 
-    user.discount = seq(.05,.25,by=.02)
-    gvt.discount = seq(.01,.03,by=.01) 
+    user.discount = .15 #seq(.05,.25,by=.02)
+    gvt.discount = .05 #seq(.01,.03,by=.01) 
 
   #-------------------#
   # intervention info #
   #-------------------#
     # different types of interventions are separated by a "\n # \n"
     #
-    interest.buydown = seq(0,0.03,by=0.005) #amount that the gvt will buydown the interest rate
+    interest.buydown = seq(0,0.03,by=0.01) #amount that the gvt will buydown the interest rate
     #
-    upfront.rebate = eecost * seq(0,0.2,by=0.02)# .20 #20 percent buydown
+    upfront.rebate = eecost * seq(0,0.2,by=0.05)# .20 #20 percent buydown
     #
     loan.loss = c(T,F) #c(F,T)
-    LPCR = .05 # loan pool coverage ratio. usually around 5-10%
+    LPCR = .10 # loan pool coverage ratio. usually around 5-10%
     # cisco devries; "$10m gives about $200m of financing" for PACE.
-    LSR = .90 #loss-share ratio, usually ~90%
+    LSR = .99 #loss-share ratio, usually ~90%
 
 #--------------------#
 # prepare inputs     #
@@ -98,7 +98,12 @@ inputs = expand.grid (inlist)
 ### call the model ###
 #--------------------#
 
-result = bankmodel(inputs)
+results = bankmodel(inputs)
+
+# create some indices for viewing different subsets of the results
+LLR = which(result[,"loan.loss"] & result[,"upfront.rebate"]==0 & result[,"interest.buydown"]==0)
+IRB = which(!result[,"loan.loss"] & result[,"upfront.rebate"]==0)
+rebate = which(!result[,"loan.loss"] & result[,"interest.buydown"]==0)
 
 #-------------------------------------#
 ### to be implemented in the future ###
