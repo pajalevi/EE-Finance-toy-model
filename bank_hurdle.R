@@ -135,8 +135,7 @@ bankmodel = function (input) {
 #!# /////////////// incorporate opportunity cost of LLR into gvt NPV /////////////////////
       # assume that alternative would be to invest the LLR
       # in a set of projects that pay interest at rate r, monthly
-      r= .0515 #interest rate of hypothetical investment
-      pmts = reserve.size*r/12
+      pmts = reserve.size*gvt.discount.mo
       llr.opp.cost = pmts * (1-(1+gvt.discount.mo)^-npmt)*gvt.discount.mo #discounted stream of interest on the llr
       
     
