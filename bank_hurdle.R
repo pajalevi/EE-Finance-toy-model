@@ -13,7 +13,9 @@
 #----------------------------------------------
 
 bankmodel = function (input) {
-  output = matrix(nrow=nrow(input), ncol = 8, dimnames=list(c(), c("user.NPV","bank.NPV","gvt.cost.NPV","gvt.reserve.size","gvt.llr.oppcost","interest.user","loan.payment.user","simple.payback.yrs")))
+  output = matrix(nrow=nrow(input), ncol = 9, dimnames=list(c(), c("user.NPV","bank.NPV","gvt.cost.NPV","gvt.reserve.size",
+                                                                   "gvt.llr.oppcost","interest.user","loan.payment.user","simple.payback.yrs",
+                                                                   "ev")))
   
   #----------------------------------------------#
   # Iterate through all the rows of input matrix #
@@ -69,7 +71,7 @@ bankmodel = function (input) {
           reserve.size = loan.amt * LPCR
         
       }  else { #if there is no loan loss reserve
-        #expected value of payment
+        #expected value factor of payment
         ev.pmt = no.default.chance
         reserve.size = 0
       }
@@ -82,7 +84,9 @@ bankmodel = function (input) {
       discount.stream = (1+bank.hurdle/12)^-k
       EV.NPV.factor = sum(ev.pmt * discount.stream) # i.e. expected value & NPV conversion
       
+  
       loan.payment = loan.amt / EV.NPV.factor
+    print(loan.payment)
       
       #----------------------------------#
       # solve for interest rate given to bank
@@ -105,6 +109,7 @@ bankmodel = function (input) {
     interest.user = interest.rate - input$interest.buydown[i]
     interest.user.mo = interest.user/12
     loan.payment.user = - pmt(interest.user.mo,nper=npmt,pv=loan.amt)
+  print(loan.payment.user)
       
     loan.NPV.user = loan.amt - loan.payment.user/user.discount.mo * (1 - (1/((1+user.discount.mo)^(npmt)))) 
     #print(paste("Loan NPV to user: $", loan.NPV.user,". Montly payments: $", loan.payment))
@@ -146,7 +151,7 @@ bankmodel = function (input) {
     # Calculate bank NPV, should = 0  #
     #---------------------------------#
     if(input$loan.loss[i]){
-      
+#!///////////////////////Need to change this calculation so that bank NPV is right with an LLR /////////////////////
       loan.NPV.bank = loan.payment/bank.discount.mo * (1 - (1/((1+bank.discount.mo)^(npmt))))
       # agrees with pv() function. i.e same as
       # loan.NPV.bank = - pv(rate=bank.discount.mo,nper=input$tenor*12, pmt = loan.payment)
@@ -180,7 +185,8 @@ bankmodel = function (input) {
     output[i,"interest.user"]=interest.user
     output[i,"loan.payment.user"]=loan.payment.user
     output[i,"simple.payback.yrs"]=simple.payback
-    
+    output[i,"ev"]=mean(ev.pmt)
+
   }
 
 #-----------------#
