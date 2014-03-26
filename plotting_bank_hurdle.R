@@ -7,6 +7,9 @@
 #
 # Patricia Levi 03/2014
 #----------------------------------------------
+rm(list=ls())
+source('W:/Research/Energy Efficiency/EE Finance toy model/modelinit_bank_hurdle.R')
+results
 
 
 #---------------------

@@ -41,14 +41,14 @@ source('W:\\Research\\Energy Efficiency\\EE Finance toy model\\excel_finance_fun
   #---------------#
     eecost=13000  #cost of energy upgrade ($) - energy upgrade CA agv according to Zimring
     savings.yr=1300 #yearly savings ($)
-    #ee.lifetime = 15
+    ee.lifetime = 15
     
   #----------------#
   # financing info #
   #----------------#
     tenor = 10# seq(5,15,by=5)#15 #loan tenor
     loan.frac = 1# fraction of eecost covered by loan     
-    chance.full.loss = c(.99,0.05) # i.e. default chance
+    chance.full.loss = c(0.05,0.5) # i.e. default chance
 
   #------------#
   # other info #
@@ -62,14 +62,14 @@ source('W:\\Research\\Energy Efficiency\\EE Finance toy model\\excel_finance_fun
   #-------------------#
     # different types of interventions are separated by a "\n # \n"
     #
-    interest.buydown = 0#c(0,.05)#seq(0,0.03,by=0.01) #amount that the gvt will buydown the interest rate
+    interest.buydown = c(0,.05)#seq(0,0.03,by=0.01) #amount that the gvt will buydown the interest rate
     #
-    upfront.rebate = 0#eecost * c(0,.05)#seq(0,0.2,by=0.05)# .20 #20 percent buydown
+    upfront.rebate = eecost * c(0,.05)#seq(0,0.2,by=0.05)# .20 #20 percent buydown
     #
-    loan.loss = F#c(T,F) #c(F,T)
+    loan.loss = F #c(F,T)
     LPCR = .10 # loan pool coverage ratio. usually around 5-10%
     # cisco devries; "$10m gives about $200m of financing" for PACE.
-    LSR = .99 #loss-share ratio, usually ~90%
+    LSR = .90 #loss-share ratio, usually ~90%
 
 #--------------------#
 # prepare inputs     #

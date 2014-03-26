@@ -13,9 +13,9 @@
 #----------------------------------------------
 
 bankmodel = function (input) {
-  output = matrix(nrow=nrow(input), ncol = 9, dimnames=list(c(), c("user.NPV","bank.NPV","gvt.cost.NPV","gvt.reserve.size",
-                                                                   "gvt.llr.oppcost","interest.user","loan.payment.user","simple.payback.yrs",
-                                                                   "ev")))
+  output = matrix(nrow=nrow(input), ncol = 10, dimnames=list(c(), c("user.NPV","bank.NPV","gvt.cost.NPV","gvt.reserve.size",
+                                                                   "gvt.llr.oppcost","interest.user","interest.bank","loan.payment.user",
+                                                                   "loan.payment.bank","simple.payback.yrs")))
   
   #----------------------------------------------#
   # Iterate through all the rows of input matrix #
@@ -86,7 +86,6 @@ bankmodel = function (input) {
       
   
       loan.payment = loan.amt / EV.NPV.factor
-    print(loan.payment)
       
       #----------------------------------#
       # solve for interest rate given to bank
@@ -96,7 +95,7 @@ bankmodel = function (input) {
       #----------------------------------#
       
       fx = expression(((x * loan.amt)/(1-(1+x)^-npmt))-loan.payment)
-      interest.rate.mo = tail(newton.solve(f=fx),n=1)
+      interest.rate.mo = tail(newton.solve(f=fx,loan.amt=loan.amt, loan.payment=loan.payment,npmt=npmt),n=1)
       interest.rate = interest.rate.mo * 12
       
       
@@ -109,7 +108,6 @@ bankmodel = function (input) {
     interest.user = interest.rate - input$interest.buydown[i]
     interest.user.mo = interest.user/12
     loan.payment.user = - pmt(interest.user.mo,nper=npmt,pv=loan.amt)
-  print(loan.payment.user)
       
     loan.NPV.user = loan.amt - loan.payment.user/user.discount.mo * (1 - (1/((1+user.discount.mo)^(npmt)))) 
     #print(paste("Loan NPV to user: $", loan.NPV.user,". Montly payments: $", loan.payment))
@@ -132,7 +130,7 @@ bankmodel = function (input) {
       # b/c it is typically done as an upfront lump sum.
       #-------------------
       gvt.contribution = loan.payment-loan.payment.user
-      buydown.NPV.gvt = -1* gvt.contribution/bank.discount.mo * (1 - (1/((1+bank.discount.mo)^(npmt))))
+      buydown.NPV.gvt = -1* gvt.contribution/bank.hurdle.mo * (1 - (1/((1+bank.hurdle.mo)^(npmt))))
 
       #-------------------
       # LOAN LOSS RESERVE COST
@@ -152,9 +150,9 @@ bankmodel = function (input) {
     #---------------------------------#
     if(input$loan.loss[i]){
 #!///////////////////////Need to change this calculation so that bank NPV is right with an LLR /////////////////////
-      loan.NPV.bank = loan.payment/bank.discount.mo * (1 - (1/((1+bank.discount.mo)^(npmt))))
+      loan.NPV.bank = loan.payment/bank.hurdle.mo * (1 - (1/((1+bank.hurdle.mo)^(npmt))))
       # agrees with pv() function. i.e same as
-      # loan.NPV.bank = - pv(rate=bank.discount.mo,nper=input$tenor*12, pmt = loan.payment)
+      # loan.NPV.bank = - pv(rate=bank.hurdle.mo,nper=input$tenor*12, pmt = loan.payment)
       
     }  else {
       
@@ -164,7 +162,7 @@ bankmodel = function (input) {
       cum.default.chance = (1-(1-default.chance.mo) ^ seq(1,npmt,by=1)) #this makes a list with length 12*tenor=npmt
       
       # PV of each payment made in a given month
-      PV.payment  = loan.payment / (1+bank.discount.mo)^seq(1,npmt,by=1) #this is a list with length 12*tenor
+      PV.payment  = loan.payment / (1+bank.hurdle.mo)^seq(1,npmt,by=1) #this is a list with length 12*tenor
       
       # total NPV of expected value of loan repayments
       loan.NPV.bank = sum((1-cum.default.chance) * PV.payment)
@@ -182,10 +180,11 @@ bankmodel = function (input) {
     output[i,"gvt.cost.NPV"]=gvt.cost.NPV
     output[i,"gvt.reserve.size"]=reserve.size
  #   output[i,"gvt.llr.oppcost"]=llr.opp.cost
-    output[i,"interest.user"]=interest.user
+    output[i,"interest.user"]=interest.user*100
+    output[i,"interest.bank"]=interest.rate*100
     output[i,"loan.payment.user"]=loan.payment.user
+    output[i,"loan.payment.bank"]=loan.payment
     output[i,"simple.payback.yrs"]=simple.payback
-    output[i,"ev"]=mean(ev.pmt)
 
   }
 

@@ -10,7 +10,7 @@
 # http://www.theresearchkitchen.com/archives/642
 #-------------------------------------------
 
-newton.solve = function (f,err.tol=1E-12,x0=.05,N=10,h=.00001){
+newton.solve = function (f,err.tol=1E-12,x0=.05,N=10,h=.00001,npmt,loan.amt,loan.payment){
   # f       for symbolic differentiation is an expression (f=expression(x^3 + 4*x^2 - 10))
   #         IMPORTANT: THE UNKNOWN VARIABLE MUST BE GIVEN AS 'x'
   # err.tol is the error tolerance at which
