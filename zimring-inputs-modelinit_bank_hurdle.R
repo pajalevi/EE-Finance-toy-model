@@ -40,7 +40,7 @@ source('W:\\Research\\Energy Efficiency\\EE Finance toy model\\excel_finance_fun
   # retrofit info #
   #---------------#
     eecost=13000  #cost of energy upgrade ($) - energy upgrade CA agv according to Zimring
-    savings.yr=1300 #yearly savings ($)
+    savings.yr=3000 #yearly savings ($)
     ee.lifetime = 15
     
   #----------------#
@@ -69,7 +69,7 @@ source('W:\\Research\\Energy Efficiency\\EE Finance toy model\\excel_finance_fun
     loan.loss = c(F,T)
     LPCR = .1908 # loan pool coverage ratio. usually around 5-10%
     # cisco devries; "$10m gives about $200m of financing" for PACE.
-    LSR = 1 #loss-share ratio, usually ~90%
+    LSR = .8 #loss-share ratio, usually ~90%
 
 #--------------------#
 # prepare inputs     #

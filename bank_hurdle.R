@@ -13,9 +13,9 @@
 #----------------------------------------------
 
 bankmodel = function (input) {
-  output = matrix(nrow=nrow(input), ncol = 10, dimnames=list(c(), c("user.NPV","bank.NPV","gvt.cost.NPV","gvt.reserve.size",
+  output = matrix(nrow=nrow(input), ncol = 11, dimnames=list(c(), c("user.NPV","bank.NPV","gvt.cost.NPV","gvt.reserve.size",
                                                                    "gvt.llr.oppcost","interest.user","interest.bank","loan.payment.user",
-                                                                   "loan.payment.bank","simple.payback.yrs")))
+                                                                   "loan.payment.bank","simple.payback.yrs","buydown.cost")))
   
   #----------------------------------------------#
   # Iterate through all the rows of input matrix #
@@ -63,7 +63,7 @@ bankmodel = function (input) {
           if (input$LPCR[i] < input$chance.full.loss[i]){ warning("LPCR is less than expected default rate! The pool will be exhausted!") }
         
         #expected value of payment = P(no defaults) + P(LLR pays bank AND the user defaults)
-        ev.pmt = no.default.chance + (LSR)*(1-no.default.chance)
+        ev.pmt = no.default.chance + (LSR)*(1-no.default.chance) #!# * loss.frac
         
         #-----------------#
         # find loan.loss reserve size
@@ -81,12 +81,15 @@ bankmodel = function (input) {
       #-------------------#
       ## calculate conversion factor from PV to loan payment ##
       ## from k=1 to =n, Sum of (1-(1-p(d))^k)(1+bank hurdle rate)^-k
+#!# Add, to hurdle rate in this case, ev.pmt* risk.premium.factor
+#!# but you wouldn't use that addition to discount the IRB payments, for example.
+#!# need to think carefully about when to use the risk-free and risky rate
+
       discount.stream = (1+bank.hurdle/12)^-k
       EV.NPV.factor = sum(ev.pmt * discount.stream) # i.e. expected value & NPV conversion
       
   
-      loan.payment = loan.amt / EV.NPV.factor
-      
+       
       #----------------------------------#
       # solve for interest rate given to bank
       # given loan.payment & PV=loan.amt
@@ -148,43 +151,28 @@ bankmodel = function (input) {
     # SANITY CHECK                    #
     # Calculate bank NPV, should = 0  #
     #---------------------------------#
-    if(input$loan.loss[i]){
-#!///////////////////////Need to change this calculation so that bank NPV is right with an LLR /////////////////////
-      loan.NPV.bank = loan.payment/bank.hurdle.mo * (1 - (1/((1+bank.hurdle.mo)^(npmt))))
-      # agrees with pv() function. i.e same as
-      # loan.NPV.bank = - pv(rate=bank.hurdle.mo,nper=input$tenor*12, pmt = loan.payment)
-      
-    }  else {
-      
-      # chance of default in a given month - assumes uniform distribution
-      default.chance.mo = sub.prob(input$chance.full.loss[i],npmt) #ie chance of default in a given payment cycle (month)
-      # cumulative chance of default by a given month
-      cum.default.chance = (1-(1-default.chance.mo) ^ seq(1,npmt,by=1)) #this makes a list with length 12*tenor=npmt
-      
-      # PV of each payment made in a given month
-      PV.payment  = loan.payment / (1+bank.hurdle.mo)^seq(1,npmt,by=1) #this is a list with length 12*tenor
-      
-      # total NPV of expected value of loan repayments
-      loan.NPV.bank = sum((1-cum.default.chance) * PV.payment)
-      
-    }
-#!# /////////////// NB: Doesn't account for value of LLR... ////////////////    
+    #loan.NPV.bank = loan.payment*EV.NPV.factor  # guaranteed to result in 0 bank NPV
+    
+    loan.NPV.bank = loan.payment.user*EV.NPV.factor - buydown.NPV.gvt # accounts for zero risk of IRB payment
+
     bank.NPV = loan.NPV.bank - loan.amt
         
     
     #------------------------------#
     # Fill out  output matrix      #
     #------------------------------#    
-    output[i,"user.NPV"]=user.NPV
-    output[i,"bank.NPV"]=bank.NPV
-    output[i,"gvt.cost.NPV"]=gvt.cost.NPV
-    output[i,"gvt.reserve.size"]=reserve.size
+    d=4
+    output[i,"user.NPV"]=round(user.NPV,digits=d)
+    output[i,"bank.NPV"]=round(bank.NPV,digits=d)
+    output[i,"gvt.cost.NPV"]=round(gvt.cost.NPV,digits=d)
+    output[i,"gvt.reserve.size"]=round(reserve.size,digits=d)
  #   output[i,"gvt.llr.oppcost"]=llr.opp.cost
-    output[i,"interest.user"]=interest.user*100
-    output[i,"interest.bank"]=interest.rate*100
-    output[i,"loan.payment.user"]=loan.payment.user
-    output[i,"loan.payment.bank"]=loan.payment
+    output[i,"interest.user"]=round(interest.user*100,digits=d)
+    output[i,"interest.bank"]=round(interest.rate*100,digits=d)
+    output[i,"loan.payment.user"]=round(loan.payment.user,digits=d)
+    output[i,"loan.payment.bank"]=round(loan.payment,digits=d)
     output[i,"simple.payback.yrs"]=simple.payback
+    output[i,"buydown.cost"]=round(buydown.NPV.gvt,digits=d)
 
   }
 
