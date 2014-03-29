@@ -62,8 +62,8 @@ bankmodel = function (input) {
         # could deal with this elegantly (i.e. factor it into the risk) or could just throw a warning
           if (input$LPCR[i] < input$chance.full.loss[i]){ warning("LPCR is less than expected default rate! The pool will be exhausted!") }
         
-        #expected value of payment = P(no defaults) + P(LLR pays bank AND the user defaults)
-        ev.pmt = no.default.chance + (LSR)*(1-no.default.chance) #!# * loss.frac
+        #expected value of payment = P(no defaults) + P(LLR pays bank AND the user defaults)*% recovered on default
+        ev.pmt = no.default.chance + (LSR * (1-(no.default.chance * (1 - input$recovery[i]))))
         
         #-----------------#
         # find loan.loss reserve size
@@ -87,7 +87,8 @@ bankmodel = function (input) {
 
       discount.stream = (1+bank.hurdle/12)^-k
       EV.NPV.factor = sum(ev.pmt * discount.stream) # i.e. expected value & NPV conversion
-      
+
+      loan.payment = loan.amt / EV.NPV.factor
   
        
       #----------------------------------#
@@ -96,7 +97,6 @@ bankmodel = function (input) {
       # loan.payment = (interest.rate * loan.amt)/(1-(1+interest.rate)^-n)
       # use newton.solve.R   
       #----------------------------------#
-      
       fx = expression(((x * loan.amt)/(1-(1+x)^-npmt))-loan.payment)
       interest.rate.mo = tail(newton.solve(f=fx,loan.amt=loan.amt, loan.payment=loan.payment,npmt=npmt),n=1)
       interest.rate = interest.rate.mo * 12

@@ -49,6 +49,7 @@ source('W:\\Research\\Energy Efficiency\\EE Finance toy model\\excel_finance_fun
     tenor = 10# seq(5,15,by=5)#15 #loan tenor
     loan.frac = 1# fraction of eecost covered by loan     
     chance.full.loss = c(0,.04)#c(0.05,0.5) # i.e. default chance
+    recovery = .4 #pct of loan that is recovered on default
 
   #------------#
   # other info #
@@ -86,6 +87,7 @@ inlist = list(eecost = eecost,
               user.discount = user.discount, 
               gvt.discount = gvt.discount, 
               chance.full.loss = chance.full.loss,
+              recovery=recovery,
               loan.loss = loan.loss,
               LPCR = LPCR,
               LSR = LSR,
