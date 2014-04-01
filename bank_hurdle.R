@@ -57,25 +57,21 @@ bankmodel = function (input) {
       # cumulative chance of no default by a given month
       no.default.chance = (1-default.chance.mo) ^ k #this makes a list with length 12*tenor=npmt
       
-      if(input$loan.loss[i]){ #if there is a loan loss reserve 
-        # loan pool coverage ratio (LPCR) - if chance.full.loss > LPCR --> problems!
-        # could deal with this elegantly (i.e. factor it into the risk) or could just throw a warning
-          if (input$LPCR[i] < input$chance.full.loss[i]){ warning("LPCR is less than expected default rate! The pool will be exhausted!") }
-        
-        #expected value of payment = P(no defaults) + P(LLR pays bank AND the user defaults)*% recovered on default
-        ev.pmt = no.default.chance + (LSR * (1-(no.default.chance * (1 - input$recovery[i]))))
-        
-        #-----------------#
-        # find loan.loss reserve size
-        #-----------------#
-          reserve.size = loan.amt * LPCR
-        
-      }  else { #if there is no loan loss reserve
-        #expected value factor of payment
-        ev.pmt = no.default.chance
-        reserve.size = 0
-      }
-    
+      # loan pool coverage ratio (LPCR) - if chance.full.loss > LPCR --> problems!
+      # could deal with this elegantly (i.e. factor it into the risk) or could just throw a warning
+        if (input$LPCR[i] < input$chance.full.loss[i]){ warning("LPCR is less than expected default rate! The pool will be exhausted!") }
+      
+      #expected value of payment = P(no defaults) + P(LLR OR (Loan Security/Recovery) pays bank AND the user defaults)
+      ev.pmt = no.default.chance + ((1-no.default.chance) * (1-(1-input$recovery[i]) *(1-input$LSR[i])))
+        # ASSUMPTION: if recovery is 40%, and LSR is 80%, gvt makes bank whole for 80% of outstanding balance [leaving the bank with 12% loss]
+              # Credit Enhancement Overview Guide wording: 
+              # LSR = "the percentage of a lender's loss on each customer default that they can recover." 
+
+       #-----------------#
+      # find loan.loss reserve size
+      #-----------------#
+        reserve.size = loan.amt * input$LSR[i] * input$LPCR[i]
+     
       #-------------------#
       # find Loan Payment to bank #
       #-------------------#

@@ -46,10 +46,10 @@ source('W:\\Research\\Energy Efficiency\\EE Finance toy model\\excel_finance_fun
   #----------------#
   # financing info #
   #----------------#
-    tenor = 10# seq(5,15,by=5)#15 #loan tenor
+    tenor = c(5,10)# seq(5,15,by=5)#15 #loan tenor
     loan.frac = 1# fraction of eecost covered by loan     
-    chance.full.loss = c(0,.04)#c(0.05,0.5) # i.e. default chance
-    recovery = c(0,.4) #pct of loan that is recovered on default
+    chance.full.loss = c(0.05,0.5) # i.e. default chance
+    recovery = .4 #pct of loan that is recovered on default
 
   #------------#
   # other info #
@@ -68,12 +68,12 @@ source('W:\\Research\\Energy Efficiency\\EE Finance toy model\\excel_finance_fun
     #
     interest.buydown = c(0,(14.99-9.7)/100)#seq(0,0.03,by=0.01) #amount that the gvt will buydown the interest rate
     #
-    upfront.rebate = 0#eecost * c(0,.05)#seq(0,0.2,by=0.05)# .20 #20 percent buydown
+    upfront.rebate = eecost * c(0,.05)#seq(0,0.2,by=0.05)# .20 #20 percent buydown
     #
-    loan.loss = c(F,T)
+    #TO TURN OFF LOAN LOSS RESERVE, SET LSR=0
     LPCR = .1908 # loan pool coverage ratio. usually around 5-10%
     # cisco devries; "$10m gives about $200m of financing" for PACE.
-    LSR = 1 #loss-share ratio, usually ~90%
+    LSR = .8 #loss-share ratio, usually ~90%
 
 #--------------------#
 # prepare inputs     #
@@ -92,7 +92,6 @@ inlist = list(eecost = eecost,
               chance.full.loss = chance.full.loss,
               recovery=recovery,
               risk.adjust=risk.adjust,
-              loan.loss = loan.loss,
               LPCR = LPCR,
               LSR = LSR,
               interest.buydown = interest.buydown, 
@@ -107,10 +106,13 @@ inputs = expand.grid (inlist)
 results = bankmodel(inputs)
 
 # create some indices for viewing different subsets of the results
-LLR = which(results[,"loan.loss"] & results[,"upfront.rebate"]==0 & results[,"interest.buydown"]==0)
-IRB = which(!results[,"loan.loss"] & results[,"upfront.rebate"]==0)
-rebate = which(!results[,"loan.loss"] & results[,"interest.buydown"]==0)
-nothing = which(!results[,"loan.loss"] & results[,"upfront.rebate"]==0 & results[,"interest.buydown"]==0)
+LLR = results[,"LSR"]>0 & results[,"upfront.rebate"]==0 & results[,"interest.buydown"]==0
+IRB = results[,"LSR"]==0 & results[,"upfront.rebate"]==0
+rebate = results[,"LSR"]==0 & results[,"interest.buydown"]==0
+nothing = results[,"LSR"]==0 & results[,"upfront.rebate"]==0 & results[,"interest.buydown"]==0
+no.loss=results[,"chance.full.loss"]==0
+no.recovery = results[,"recovery"]==0
+
 
 #-------------------------------------#
 ### to be implemented in the future ###
