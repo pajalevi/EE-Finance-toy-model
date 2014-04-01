@@ -80,7 +80,7 @@ bankmodel = function (input) {
 #!# Add, to hurdle rate in this case, (1-ev.pmt)* risk.premium.factor
 #!# but you wouldn't use that addition to discount the IRB payments, for example.
 #!# need to think carefully about when to use the risk-free and risky rate
-      bank.risk.premium = 0#input$risk.adjust[i]*(1-ev.pmt)
+      bank.risk.premium = input$risk.adjust[i]*(1-ev.pmt)
 
       discount.stream = (1+(bank.hurdle + bank.risk.premium)/12)^-k
       EV.NPV.factor = sum(ev.pmt * discount.stream) # i.e. expected value & NPV conversion

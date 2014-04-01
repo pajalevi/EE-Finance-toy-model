@@ -46,16 +46,16 @@ source('W:\\Research\\Energy Efficiency\\EE Finance toy model\\excel_finance_fun
   #----------------#
   # financing info #
   #----------------#
-    tenor = c(5,10)# seq(5,15,by=5)#15 #loan tenor
+    tenor = 10# seq(5,15,by=5)#15 #loan tenor
     loan.frac = 1# fraction of eecost covered by loan     
-    chance.full.loss = c(0.05,0.5) # i.e. default chance
+    chance.full.loss = c(0.05,0.15) # i.e. default chance
     recovery = .4 #pct of loan that is recovered on default
 
   #------------#
   # other info #
   #------------#
     bank.hurdle = .1499#cost of capital http://pages.stern.nyu.edu/~adamodar/New_Home_Page/datafile/wacc.htm #.0075 
-    risk.adjust = 0#c(0,.4) # as in (Amato, J., 2005) this number is used as follows
+    risk.adjust = c(0,.4) # as in (Amato, J., 2005) this number is used as follows
 #!#                   # additional return (basis pts) required to compensate for risk = expected loss(i.e. 1-ev.pmt) * risk.adjust
                       # same source gives the .4 number
     user.discount = .15 #seq(.05,.25,by=.02)
@@ -91,11 +91,11 @@ inlist = list(eecost = eecost,
               gvt.discount = gvt.discount, 
               chance.full.loss = chance.full.loss,
               recovery=recovery,
-              risk.adjust=risk.adjust,
               LPCR = LPCR,
               LSR = LSR,
               interest.buydown = interest.buydown, 
-              upfront.rebate = upfront.rebate)
+              upfront.rebate = upfront.rebate,
+              risk.adjust=risk.adjust)
 
 inputs = expand.grid (inlist)
 
