@@ -13,9 +13,9 @@
 #----------------------------------------------
 
 bankmodel = function (input) {
-  output = matrix(nrow=nrow(input), ncol = 11, dimnames=list(c(), c("user.NPV","bank.NPV","gvt.cost.NPV","gvt.reserve.size",
-                                                                   "gvt.llr.oppcost","interest.user","interest.bank","loan.payment.user",
-                                                                   "loan.payment.bank","simple.payback.yrs","buydown.cost")))
+  output = matrix(nrow=nrow(input), ncol = 12, dimnames=list(c(), c("expected.loss.pct","interest.user","interest.bank","loan.payment.user",
+                                                                   "loan.payment.bank","simple.payback.yrs","user.NPV","bank.NPV","gvt.cost.NPV",
+                                                                   "gvt.reserve.size","gvt.llr.oppcost","buydown.cost")))
   
   #----------------------------------------------#
   # Iterate through all the rows of input matrix #
@@ -66,12 +66,7 @@ bankmodel = function (input) {
         # ASSUMPTION: if recovery is 40%, and LSR is 80%, gvt makes bank whole for 80% of outstanding balance [leaving the bank with 12% loss]
               # Credit Enhancement Overview Guide wording: 
               # LSR = "the percentage of a lender's loss on each customer default that they can recover." 
-
-       #-----------------#
-      # find loan.loss reserve size
-      #-----------------#
-        reserve.size = loan.amt * input$LSR[i] * input$LPCR[i]
-     
+          
       #-------------------#
       # find Loan Payment to bank #
       #-------------------#
@@ -87,7 +82,9 @@ bankmodel = function (input) {
 
       loan.payment = loan.amt / EV.NPV.factor
   
-       
+      # for bookkeeping, what % of total value is expected to be lost?    
+      expected.loss = 100*sum((1-no.default.chance)*((1-input$recovery[i]) *(1-input$LSR[i]))*loan.amt)/(npmt*loan.amt)
+
       #----------------------------------#
       # solve for interest rate given to bank
       # given loan.payment & PV=loan.amt
@@ -124,6 +121,11 @@ bankmodel = function (input) {
     # Calculate cost to government #
     #------------------------------#
 
+      #-----------------#
+      # find loan.loss reserve size
+      #-----------------#
+      reserve.size = loan.amt * input$LSR[i] * input$LPCR[i]
+      
       #-------------------
       # INTEREST RATE BUYDOWN COST
       # appropriate discount rate is the bank's
@@ -159,6 +161,7 @@ bankmodel = function (input) {
     # Fill out  output matrix      #
     #------------------------------#    
     d=4
+    output[i,"expected.loss.pct"]=expected.loss
     output[i,"user.NPV"]=round(user.NPV,digits=d)
     output[i,"bank.NPV"]=round(bank.NPV,digits=d)
     output[i,"gvt.cost.NPV"]=round(gvt.cost.NPV,digits=d)
