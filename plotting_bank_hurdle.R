@@ -1,4 +1,3 @@
-
 #----------------------------------------------
 # plotting_bank_hurdle.R
 # contains various ways/attempts to plot up the results
@@ -7,10 +6,6 @@
 #
 # Patricia Levi 03/2014
 #----------------------------------------------
-rm(list=ls())
-source('W:/Research/Energy Efficiency/EE Finance toy model/modelinit_bank_hurdle.R')
-results
-
 
 #---------------------
 ### cost to gvt (x) vs NPV to user for interest rate buydown and upfront rebate
@@ -52,6 +47,8 @@ if(length(upfront.rebate)>1 | length(interest.buydown)>1){
 
 #-----------------------
 # ATTEMPT 1:compare costs of different interventions
+# compiles summary stats for rebates and buydowns
+# so they can be plotted (below)
 #------------------------
 
 
@@ -78,13 +75,14 @@ for(i in 1:dim(combo.buydown)[[1]]){
 # cost to gvt, discount rates, etc, that result in the user terms
 
 # find average (and sd) of cost to government
-new = numeric(dim(combo.buydown)[[1]])
-combo.buydown=cbind(combo.buydown,new,new)
+new = numeric(dim(combo.buydown)[[1]]) # creates a numeric matrix with the dimensions specified
+combo.buydown=cbind(combo.buydown,new,new) # adds two new columns to combo.buydown
 dimnames(combo.buydown)[[2]]=c(dimnames(combo.buydown)[[2]][1:2],"cost.gvt.avg","cost.gvt.sd")
 for(i in 1:dim(combo.buydown)[[1]]){
   combo.buydown[i,"cost.gvt.avg"]=mean(result[buydown.index[[i]],"gvt.cost.NPV"])
   combo.buydown[i,"cost.gvt.sd"]=sd(result[buydown.index[[i]],"gvt.cost.NPV"])
 }
+
 #-------------------------------------------------------------
 # ATTEMPT 2
 # for each unique situation, compile some summary stats on the 
@@ -100,29 +98,26 @@ gvt.means = tapply(result[,"gvt.cost.NPV"],INDEX=result[,vary], FUN=mean)
 userpmt.means = tapply(result[,"loan.payment.user"],INDEX=result[,vary], FUN=mean)
 userpmt.sd = tapply(result[,"loan.payment.user"],INDEX=result[,vary], FUN=sd)
 
-###############################################
-# could in theory develop a plotting system
-# that would respond dynamically to any 
-# set of varying factors
-# but thats not going to be worth my time right now
-##############################################
+## plotting functions are below ##
+
 
 #---------
-# for varying rebate, buydown, tenor, and gvt discount rate
+# Attempt 2.5 (w/ same plotting code) for varying rebate, buydown, tenor, and gvt discount rate
+# Rebates vs IRB
 gvt.means = tapply(result[,"gvt.cost.NPV"],INDEX=result[,c(4,8,11,12)], FUN=mean)
 userpmt.means = tapply(result[,"loan.payment.user"],INDEX=result[,c(4,8,11,12)], FUN=mean)
 
-yl=range(userpmt.means[3,,,])
-xl=range(gvt.means[3,,,])
-plot(y= userpmt.means[3,,,1], #tenor=15, no upfront rebate
-     x= gvt.means[3,,,1], #start with the upfront rebate
+yl=range(userpmt.means[1,,,])
+xl=range(gvt.means[1,,,])
+plot(y= userpmt.means[1,,,1], #tenor=15, no upfront rebate
+     x= gvt.means[1,,,1], #start with the upfront rebate
      xlab= "NPV, cost to government ($)",
      ylab= "Consumer's monthly payment ($)",
 #     xlim= xl, ylim=yl,
      pch=1,
      col=1)
-points(y= userpmt.means[3,,1,], #tenor=15, no interest buydown
-       x= gvt.means[3,,1,], 
+points(y= userpmt.means[1,,1,], #tenor=15, no interest buydown
+       x= gvt.means[1,,1,], 
        pch=4,
        col=2)
 par(cex.sub=.6)
@@ -136,10 +131,15 @@ legend('topleft',
        col=c(1,2),
        bty='n')
 
-
+###############################################
+# could in theory develop a plotting system
+# that would respond dynamically to any 
+# set of varying factors
+# but thats not going to be worth my time right now
+##############################################
 
 #----------------------------------------------------------------
-# ATTEMPT 2.5: For variance in tenor, interest rate buydown, and upfront rebate
+# ATTEMPT 3: For variance in tenor, interest rate buydown, and upfront rebate
 #----------------------------------------------------------------
 gvt.means = tapply(result[,"gvt.cost.NPV"],INDEX=result[,c("tenor","interest.user","upfront.rebate")], FUN=mean)
 userpmt.means = tapply(result[,"loan.payment.user"],INDEX=result[,c("tenor","interest.user","upfront.rebate")], FUN=mean)
@@ -153,15 +153,15 @@ userpmt.sd = tapply(result[,"loan.payment.user"],INDEX=result[,c("tenor","intere
 #as.numeric(dimnames(userpmt.means)[[2]])) # to extract the data from dimnames
 
 #plot up this information somehow
-plot(y= userpmt.means[3,,1], #tenor=15, no upfront rebate
-     x= gvt.means[3,,1], #start with the upfront rebate
+plot(y= userpmt.means[1,,1], #first dim is tenor
+     x= gvt.means[1,,1], #start with the upfront rebate
      xlab= "NPV, cost to government ($)",
      ylab= "Consumer's monthly payment ($)",
      pch=1,
      col=1,
      type='o')
-points(y= userpmt.means[3,dim(userpmt.means)[2],], #tenor=15, no interest buydown
-       x= gvt.means[3,dim(userpmt.means)[2],], 
+points(y= userpmt.means[1,dim(userpmt.means)[2],], #tenor=15, no interest buydown
+       x= gvt.means[1,dim(userpmt.means)[2],], 
        pch=4,
        col=2,
        type='o')

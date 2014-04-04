@@ -28,6 +28,8 @@ pv <- function(rate, nper, pmt, fv = 0.0, type = 0) {
   return((-fv - pmt * (1.0 + rate * type) * fvifa) / pvif)
 }
 
+
+# NB: returns NaN if rate=0
 pmt <- function(rate, nper, pv, fv=0, type=0) {
   rr <- 1/(1+rate)^nper
   res <- (-pv-fv*rr)*rate/(1-rr)

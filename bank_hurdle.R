@@ -13,7 +13,7 @@
 #----------------------------------------------
 
 bankmodel = function (input) {
-  output = matrix(nrow=nrow(input), ncol = 12, dimnames=list(c(), c("expected.loss.pct","interest.user","interest.bank","loan.payment.user",
+  output = matrix(nrow=nrow(input), ncol = 13, dimnames=list(c(), c("expected.loss.pct","expected.loss","interest.user","interest.bank","loan.payment.user",
                                                                    "loan.payment.bank","simple.payback.yrs","user.NPV","bank.NPV","gvt.cost.NPV",
                                                                    "gvt.reserve.size","gvt.llr.oppcost","buydown.cost")))
   
@@ -32,9 +32,9 @@ bankmodel = function (input) {
     # assume monthly loan payment &    #
     # calculate monthly rates          #
     #----------------------------------#
-    bank.hurdle.mo = input$bank.hurdle[i]/12
-    user.discount.mo = input$user.discount[i]/12
-    gvt.discount.mo = input$gvt.discount[i]/12 # used for LLR opportunity cost
+    bank.hurdle.mo = mo.rate(input$bank.hurdle[i])
+    user.discount.mo = mo.rate(input$user.discount[i])
+    gvt.discount.mo = mo.rate(input$gvt.discount[i]) # used for LLR opportunity cost
     npmt = input$tenor[i]*12 # number of payments over tenor of loan    
     
     #--------------------------#
@@ -56,13 +56,22 @@ bankmodel = function (input) {
       default.chance.mo = sub.prob(input$chance.full.loss[i],npmt) #ie chance of default in a given payment cycle (month)
       # cumulative chance of no default by a given month
       no.default.chance = (1-default.chance.mo) ^ k #this makes a list with length 12*tenor=npmt
+    
+    # for bookkeeping, what % of total value is expected to be lost?    
+    expected.loss = sum((1-no.default.chance)*((1-input$recovery[i]) *(1-input$LSR[i])))/(npmt)
+    expected.loss.noLLR = sum((1-no.default.chance)*(1-input$recovery[i]))/(npmt)
       
-      # loan pool coverage ratio (LPCR) - if chance.full.loss > LPCR --> problems!
-      # could deal with this elegantly (i.e. factor it into the risk) or could just throw a warning
-        if (input$LPCR[i] < input$chance.full.loss[i]){ warning("LPCR is less than expected default rate! The pool will be exhausted!") }
+      # loan pool coverage ratio (LPCR) - if expected.loss > LPCR --> problems!
+      # Attempt to factor this in the the small.LLR adjustment
+#!# I HAVE NO IDEA IF THIS IS CORRECT IN ANY WAY
+        small.LLR = 1
+        if (input$LPCR[i] < expected.loss.noLLR){ 
+          warning("LPCR is less than expected loss! The pool will be exhausted!") 
+          small.LLR = input$LPCR[i] / expected.loss.noLLR
+        }
       
       #expected value of payment = P(no defaults) + P(LLR OR (Loan Security/Recovery) pays bank AND the user defaults)
-      ev.pmt = no.default.chance + ((1-no.default.chance) * (1-(1-input$recovery[i]) *(1-input$LSR[i])))
+      ev.pmt = no.default.chance + ((1-no.default.chance) * (1-(1-input$recovery[i]) *(1-(input$LSR[i]* small.LLR))))
         # ASSUMPTION: if recovery is 40%, and LSR is 80%, gvt makes bank whole for 80% of outstanding balance [leaving the bank with 12% loss]
               # Credit Enhancement Overview Guide wording: 
               # LSR = "the percentage of a lender's loss on each customer default that they can recover." 
@@ -77,13 +86,11 @@ bankmodel = function (input) {
 #!# need to think carefully about when to use the risk-free and risky rate
       bank.risk.premium = input$risk.adjust[i]*(1-ev.pmt)
 
-      discount.stream = (1+(bank.hurdle + bank.risk.premium)/12)^-k
+      discount.stream = (1+mo.rate(bank.hurdle + bank.risk.premium))^-k
       EV.NPV.factor = sum(ev.pmt * discount.stream) # i.e. expected value & NPV conversion
 
       loan.payment = loan.amt / EV.NPV.factor
   
-      # for bookkeeping, what % of total value is expected to be lost?    
-      expected.loss = 100*sum((1-no.default.chance)*((1-input$recovery[i]) *(1-input$LSR[i]))*loan.amt)/(npmt*loan.amt)
 
       #----------------------------------#
       # solve for interest rate given to bank
@@ -93,7 +100,7 @@ bankmodel = function (input) {
       #----------------------------------#
       fx = expression(((x * loan.amt)/(1-(1+x)^-npmt))-loan.payment)
       interest.rate.mo = tail(newton.solve(f=fx,loan.amt=loan.amt, loan.payment=loan.payment,npmt=npmt),n=1)
-      interest.rate = interest.rate.mo * 12
+      interest.rate = yr.rate(interest.rate.mo)
       
       
     #------------------------------#
@@ -102,9 +109,23 @@ bankmodel = function (input) {
     # and net present value #
     # account for interest-rate buydown, upfront rebate
     #------------------------------#
-    interest.user = interest.rate - input$interest.buydown[i]
-    interest.user.mo = interest.user/12
+    
+    # disallow interest rate buydowns that would result in a negative interest rate for the user
+    if(interest.rate - input$interest.buydown[i] >= 0){
+      interest.user = interest.rate - input$interest.buydown[i]
+    } else {
+      interest.user=0
+      # uncomment if you'd like to display the ACTUAL buydown, 
+      # not the buydown that was initially set
+      input$interest.buydown[i] = interest.rate
+    }
+
+    interest.user.mo = mo.rate(interest.user)
     loan.payment.user = - pmt(interest.user.mo,nper=npmt,pv=loan.amt)
+    # pmt returns NaN if interest = 0; catch that & replace
+    if(is.nan(loan.payment.user)){ 
+      loan.payment.user=loan.amt/npmt
+    }
       
     loan.NPV.user = loan.amt - loan.payment.user/user.discount.mo * (1 - (1/((1+user.discount.mo)^(npmt)))) 
     #print(paste("Loan NPV to user: $", loan.NPV.user,". Montly payments: $", loan.payment))
@@ -162,6 +183,7 @@ bankmodel = function (input) {
     #------------------------------#    
     d=4
     output[i,"expected.loss.pct"]=expected.loss
+    output[i,"expected.loss"]=.01*expected.loss*loan.amt
     output[i,"user.NPV"]=round(user.NPV,digits=d)
     output[i,"bank.NPV"]=round(bank.NPV,digits=d)
     output[i,"gvt.cost.NPV"]=round(gvt.cost.NPV,digits=d)
@@ -198,8 +220,10 @@ bankmodel = function (input) {
 #--------------------------------#
 # Helper functions for the model #
 #--------------------------------#
+  #--------------------------------#
   # calculate probability of an event in a sub-period, 
   # given overall rate & number of sub-periods
+  #--------------------------------#
   sub.prob = function (prob, n){
     if(prob>1) {stop("prob is greater than 1, which is breaking the math")}
     r_p =1-((1-prob)^(1/n))
@@ -210,16 +234,16 @@ bankmodel = function (input) {
   # deal with compounding interest #
   #--------------------------------#
   # calculate the monthly rate from yearly 
-#   mo.rate = function (yr.rate,n=12){
-#     #if(yr.rate>1) {stop("yearly rate is greater than 100%, which is breaking the math")}
-#     monthly = ((1+yr.rate)^n)-1
-#     return(monthly)
-#   }
-#   
-#   #calculate compounded yearly rate from nominal monthly rate
-#   yr.rate = function (mo.rate, n=12){
-#     if(mo.rate>1) {stop("monthly rate is greater than 100%, which is breaking the math")}
-#     yearly =1-(1-mo.rate)^n
-#     return(yearly)    
-#   }
+   mo.rate = function (yr.rate,n=12){
+    #if(yr.rate>1) {stop("yearly rate is greater than 100%, which is breaking the math")}
+    monthly = ((1+yr.rate)^(1/n))-1
+    return(monthly)
+  }
+  
+  #calculate compounded yearly rate from nominal monthly rate
+  yr.rate = function (mo.rate, n=12){
+    if(mo.rate>1) {stop("monthly rate is greater than 100%, which is breaking the math")}
+    yearly =((1+mo.rate)^n)-1
+    return(yearly)    
+  }
   
