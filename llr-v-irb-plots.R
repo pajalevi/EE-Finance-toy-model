@@ -11,7 +11,7 @@
 
 # shortcuts:
 rm(list=ls())
-source('W:/Research/Energy Efficiency/EE Finance toy model/modelinit_bank_hurdle.R')
+source('W:/Research/Energy Efficiency/EE Finance toy model/modelinit_bank_hurdle-runA.R')
 
 
 #-------------------------
@@ -24,7 +24,7 @@ source('W:/Research/Energy Efficiency/EE Finance toy model/modelinit_bank_hurdle
 #--------------------------
 
 # show only entries where IRB bought the rate down to zero
-results[IRB & results[,"interest.user"]==0,]
+#results[IRB & results[,"interest.user"]==0,]
 
 #---------------------------------------------
 # Axes: cost to gvt vs consumer's monthly payments
@@ -32,10 +32,15 @@ results[IRB & results[,"interest.user"]==0,]
 # held constant: all dat other stuff
 #---------------------------------------------
 
+
 # tapply: finding the measn/sd of a given column for each unique combination of the factors in INDEX
-gvt.means = tapply(results[,"gvt.cost.NPV"],INDEX=results[,c("LSR","LPCR","interest.buydown")], FUN=mean)
-userpmt.means = tapply(results[,"loan.payment.user"],INDEX=results[,c("LSR","LPCR","interest.buydown")], FUN=mean)
+gvt.means = tapply(results[,"gvt.cost.NPV"],INDEX=results[,c("LSR","LPCR","interest.buydown","chance.full.loss")], FUN=mean)
+userpmt.means = tapply(results[,"loan.payment.user"],INDEX=results[,c("LSR","LPCR","interest.buydown","chance.full.loss")], FUN=mean)
 #userpmt.sd = tapply(result[,"loan.payment.user"],INDEX=result[,c("LSR","LPCR","interest.buydown")], FUN=sd)
+
+#!# TODO: Make alternate script that plots consumer interest rate instead of userpmt, in a nicer way than this:
+interest.means = tapply(results[,"interest.user"],INDEX=results[,c("LSR","LPCR","interest.buydown","chance.full.loss")], FUN=mean)
+userpmt.means=interest.means
 
 #!# For some reason the tapply results return NA for mean loan.payment.user when interest.buydown=interest.bank AND LSR !=0
 #!#! fortunately we are not interested in these results, but it is still an issue that would be nice to resolve
@@ -43,9 +48,10 @@ userpmt.means = tapply(results[,"loan.payment.user"],INDEX=results[,c("LSR","LPC
 # dim 1 is LSR
 # dim 2 is LPCR
 # dim 3 is interest.buydown
-# userpmt.means[1,,] is the sheet with 0 LSR (i.e. no LLR)
-# userpmt.means[,,1] is the sheet with no IRB
-# userpmt.means[2:dim(userpmt.means)[1],,1] is the sheet with an active LLR
+# dim 4 is chance.full.loss
+# userpmt.means[1,,,] is the sheet with 0 LSR (i.e. no LLR)
+# userpmt.means[,,1,] is the sheet with no IRB
+# userpmt.means[2:dim(userpmt.means)[1],,1,] is the sheet with an active LLR
 
 # to extract the data from dimnames, which are the values of the 
 # INDEX variables used in tapply
@@ -56,20 +62,46 @@ userpmt.means = tapply(results[,"loan.payment.user"],INDEX=results[,c("LSR","LPC
 xl = range(gvt.means[],na.rm=T)
 yl = range(userpmt.means[],na.rm=T)
 
-plot(y= userpmt.means[2:dim(userpmt.means)[1],,1], 
-     x= gvt.means[2:dim(userpmt.means)[1],,1], #start with the LLR (IRB = 0 & LSR != 0)
+
+## first plot low range ##
+loss.index=1
+
+plot(y= c(userpmt.means[1,1,1,loss.index],userpmt.means[2:dim(userpmt.means)[1],,1,loss.index]), # c() concatenates a singular zero point
+     x= c(gvt.means[1,1,1,loss.index], gvt.means[2:dim(userpmt.means)[1],,1,loss.index]), #start with the LLR (IRB = 0 & LSR != 0)
      xlab= "NPV, cost to government ($)",
      ylab= "Consumer's monthly payment ($)",
      pch=1,
      col=1,
      xlim=xl, ylim=yl,
-     type='p')
+     type='o')
+
 # now plot points with an LLR and without an IRB
-points(y= userpmt.means[1,1,2:dim(userpmt.means)[3]], #doesn't matter what sheet we use in 2nd dim since LPCR is irrelevant
-       x= gvt.means[1,1,2:dim(userpmt.means)[3]], 
+points(y= c(userpmt.means[1,1,1,loss.index], userpmt.means[1,1,1:dim(userpmt.means)[3],loss.index]), #doesn't matter what sheet we use in 2nd dim since LPCR is irrelevant
+       x= c(gvt.means[1,1,1,loss.index],gvt.means[1,1,1:dim(userpmt.means)[3],loss.index]), 
        pch=4,
        col=2,
-       type='p')
+       type='o')
+
+#!# somehow not all the lines are connected for IRB line
+
+## now plot high range ##
+loss.index=dim(userpmt.means)[[4]]
+
+points(y= c(userpmt.means[1,1,1,loss.index],userpmt.means[2:dim(userpmt.means)[1],,1,loss.index]), # c() concatenates a singular zero point
+     x= c(gvt.means[1,1,1,loss.index], gvt.means[2:dim(userpmt.means)[1],,1,loss.index]), #start with the LLR (IRB = 0 & LSR != 0)
+     pch=1,
+     col=1,
+     type='o')
+
+# now plot points with an LLR and without an IRB
+points(y= c(userpmt.means[1,1,1,loss.index], userpmt.means[1,1,1:dim(userpmt.means)[3],loss.index]), #doesn't matter what sheet we use in 2nd dim since LPCR is irrelevant
+       x= c(gvt.means[1,1,1,loss.index],gvt.means[1,1,1:dim(userpmt.means)[3],loss.index]), 
+       pch=4,
+       col=2,
+       type='o')
+
+
+## plot acoutrements ##
 #legend('topleft', legend = c("Loan Loss Reserve","Interest rate buydowns"), pch=c(1,4),col=c(1,2))
 legend('topleft', 
        legend = c(paste("Loan Loss Reserve:\n",min(results[LLR,"LPCR"])*100,"% - ",max(results[LLR,"LPCR"])*100,"% LPCR",sep=''),
@@ -80,6 +112,10 @@ legend('topleft',
        bty='n')
 
 title(main="Comparing costs and effects of IRB and LLR",sub=paste("Tenor=10, Project cost=",results[,"eecost"],sep=''))
+
+#!# TODO: add a subtitle showing the range of expected losses.
+#!# TODO: figureout how to plot the midpoint and range (solid line in center, shaded area / dashed lines around it) to show range
+          # ofpossibility for interest rage / monthly payment values. may have to use ggplot?
 
 #        axes=F,
 #        pch=1)

@@ -63,7 +63,7 @@ source('W:\\Research\\Energy Efficiency\\EE Finance toy model\\excel_finance_fun
     risk.adjust =.4 # as in (Amato, J., 2005) this number is used as follows
 #!#                 # additional return (basis pts) required to compensate for risk = expected loss(i.e. 1-ev.pmt) * risk.adjust
                     # same source gives the .4 number
-    chance.full.loss = .13 # i.e. chance of defaulting by end of loan tenor. 13% ~= 4% expected loss
+    chance.full.loss = seq(.13,.30,by=.03) # i.e. chance of defaulting by end of loan tenor. 13% ~= 4% expected loss
     recovery = .4 #pct of loan that is recovered on default
     
   #-------------------#
@@ -76,7 +76,7 @@ source('W:\\Research\\Energy Efficiency\\EE Finance toy model\\excel_finance_fun
     upfront.rebate = 0#eecost * c(0,.05)#seq(0,0.2,by=0.05)# .20 #20 percent buydown
     #
     #TO TURN OFF LOAN LOSS RESERVE, SET LSR=0
-    LPCR = c(.02,.03,.04,.05,.06,.07) # loan pool coverage ratio. usually around 5-10%
+    LPCR = seq(.02,.15,by=.01) # loan pool coverage ratio. usually around 5-10%
     # cisco devries; "$10m gives about $200m of financing" for PACE.
     LSR = c(0,.8) #loss-share ratio, usually ~90%. 0% --> no LLR
 
