@@ -173,4 +173,5 @@ q <- qplot(gvt.cost.NPV,interest.user, data=resultdf.irb, color=chance.full.loss
 
 
 
+abline(lm(userpmt.means[1,1,1:dim(userpmt.means)[3],loss.index] ~ gvt.means[1,1,1:dim(userpmt.means)[3],loss.index]), col='blue')
 
