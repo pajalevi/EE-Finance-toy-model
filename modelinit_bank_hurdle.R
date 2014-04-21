@@ -12,14 +12,15 @@
 # Patricia Levi 03/2014
 #----------------------------------------------
 
+folder = 'W:\\Research\\Energy Efficiency\\EE Finance toy model\\'
 
 #source model contents
-source('W:\\Research\\Energy Efficiency\\EE Finance toy model\\bank_hurdle.R')
+source(paste(folder,'bank_hurdle.R',sep=''))
 
 # source newtons method solver
-source('W:/Research/Energy Efficiency/EE Finance toy model/newton.solve.R')
+source(paste(folder,'newton.solve.R',sep=''))
 
-source('W:\\Research\\Energy Efficiency\\EE Finance toy model\\excel_finance_functions.R')
+source(paste(folder,'excel_finance_functions.R',sep='')
 ### loads some pre-made R-copies of excel's finance functions. Thanks, the Internet! ###
 ### included: NPV(rate, values), 
 #             IRR(x, start=0.1), 
@@ -103,6 +104,13 @@ inlist = list(eecost = eecost,
               risk.adjust=risk.adjust)
 
 inputs = expand.grid (inlist)
+
+#---------------------------#
+# save inputs so that the   #
+# scenario can be re-used   #
+#---------------------------#
+#filename = ""
+#save(list=c(inlist,inputs), file=paste(folder,filename,sep=''))
 
 #--------------------#
 ### call the model ###
