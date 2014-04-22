@@ -109,16 +109,17 @@ bankmodel = function (input) {
     # and net present value #
     # account for interest-rate buydown, upfront rebate
     #------------------------------#
-    
+
     # disallow interest rate buydowns that would result in a negative interest rate for the user
-    if(interest.rate - input$interest.buydown[i] >= 0){
+#!# This might be messing with the linearity of our graphs...
+#    if(interest.rate - input$interest.buydown[i] >= 0){
       interest.user = interest.rate - input$interest.buydown[i]
-    } else {
-      interest.user=0
-      # uncomment if you'd like to display the ACTUAL buydown, 
-      # not the buydown that was initially set
-      input$interest.buydown[i] = interest.rate
-    }
+#    } else {
+#       interest.user=0
+#       # uncomment if you'd like to display the ACTUAL buydown, 
+#       # not the buydown that was initially set
+#       input$interest.buydown[i] = interest.rate
+#     }
 
     interest.user.mo = mo.rate(interest.user)
     loan.payment.user = - pmt(interest.user.mo,nper=npmt,pv=loan.amt)
