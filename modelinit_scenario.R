@@ -18,11 +18,12 @@
 #----------------------------------------------
 
 folder = 'W:\\Research\\Energy Efficiency\\EE Finance toy model\\'
-scenario = 'base.case.R'
+scenario = 'mass.save'#what set of non-intervention params do you want?
+run.name='A' #used to save this set of params for later use/reference, should you desire.
 
 # load scenario values - ie. everything except gvt intervention specifics
 # scenarios created by scenario-maker.R
-source(paste(folder,scenario,sep=''))
+load(paste(folder,'scenarios\\',scenario,".R",sep=''))
 
 #source model code
 source(paste(folder,'bank_hurdle.R',sep=''))
@@ -52,14 +53,14 @@ source(paste(folder,'excel_finance_functions.R',sep=''))
   #-------------------#
     # different types of interventions are separated by a "\n # \n"
     #
-    interest.buydown = c(0,seq(0.01,0.15,by=0.01)) #amount that the gvt will buydown the interest rate
+    interest.buydown = c(.05,.06)#c(0,seq(0.01,0.15,by=0.01)) #amount that the gvt will buydown the interest rate
     #
     upfront.rebate = 0#eecost * c(0,.05)#seq(0,0.2,by=0.05)# .20 #20 percent buydown
     #
     #TO TURN OFF LOAN LOSS RESERVE, SET LSR=0
-    LPCR = c(.02,.03,.04,.05,.06,.07) # loan pool coverage ratio. usually around 5-10%
+    LPCR = .10#c(.02,.03,.04,.05,.06,.07) # loan pool coverage ratio. usually around 5-10%
     # cisco devries; "$10m gives about $200m of financing" for PACE.
-    LSR = c(0,.8) #loss-share ratio, usually ~90%. 0% --> no LLR
+    LSR = c(0,.9) #loss-share ratio, usually ~90%. 0% --> no LLR
 
 #--------------------#
 # prepare inputs     #
@@ -69,17 +70,25 @@ source(paste(folder,'excel_finance_functions.R',sep=''))
 inlist$LPCR = LPCR
 inlist$LSR = LSR
 inlist$interest.buydown = interest.buydown
-inlist$upfront.rebate = upfront rebate
+inlist$upfront.rebate = upfront.rebate
 
 # use expand.grid, which accepts a list of vectors
 
 inputs = expand.grid (inlist)
+
 
 #--------------------#
 ### call the model ###
 #--------------------#
 
 results = bankmodel(inputs)
+
+#--------------------#
+# save model run params
+# and outputs
+#--------------------#
+save(list=c('inlist','README','inputs','results','scenario'), file=paste(folder,"model-runs\\",scenario,"-run-",run.name,sep=''))
+
 
 # create some indices for viewing different subsets of the results
 LLR = results[,"LSR"]>0 & results[,"upfront.rebate"]==0 & results[,"interest.buydown"]==0

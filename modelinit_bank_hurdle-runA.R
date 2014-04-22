@@ -60,10 +60,10 @@ source('W:\\Research\\Energy Efficiency\\EE Finance toy model\\excel_finance_fun
   #------------#
   # risky info #
   #------------#
-    risk.adjust =seq(.1,.6,by=.1)#.4 # as in (Amato, J., 2005) this number is used as follows
+    risk.adjust =.4 # as in (Amato, J., 2005) this number is used as follows
 #!#                 # additional return (basis pts) required to compensate for risk = expected loss(i.e. 1-ev.pmt) * risk.adjust
                     # same source gives the .4 number
-    chance.full.loss = .2#seq(.13,.30,by=.03) # i.e. chance of defaulting by end of loan tenor. 13% ~= 4% expected loss
+    chance.full.loss = seq(.13,.30,by=.03) # i.e. chance of defaulting by end of loan tenor. 13% ~= 4% expected loss
     recovery = .4 #pct of loan that is recovered on default
     
   #-------------------#
@@ -71,7 +71,7 @@ source('W:\\Research\\Energy Efficiency\\EE Finance toy model\\excel_finance_fun
   #-------------------#
     # different types of interventions are separated by a "\n # \n"
     #
-    interest.buydown = c(0,seq(0.01,0.11,by=0.01)) #amount that the gvt will buydown the interest rate
+    interest.buydown = c(0,seq(0.01,0.15,by=0.01)) #amount that the gvt will buydown the interest rate
     #
     upfront.rebate = 0#eecost * c(0,.05)#seq(0,0.2,by=0.05)# .20 #20 percent buydown
     #
@@ -109,6 +109,17 @@ inputs = expand.grid (inlist)
 #--------------------#
 
 results = bankmodel(inputs)
+
+#--------------------#
+# save model run params
+# and outputs
+#--------------------#
+folder = 'W:\\Research\\Energy Efficiency\\EE Finance toy model\\'
+scenario = 'sensitivityTesting'#what set of non-intervention params do you want?
+run.name='defaultRate' #used to save this set of params for later use/reference, should you desire.
+
+save(list=c('inlist','inputs','results'), file=paste(folder,"model-runs\\",scenario,"-run-",run.name,sep=''))
+
 
 # create some indices for viewing different subsets of the results
 LLR = results[,"LSR"]>0 & results[,"upfront.rebate"]==0 & results[,"interest.buydown"]==0
