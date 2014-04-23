@@ -19,7 +19,8 @@
 
 folder = 'W:\\Research\\Energy Efficiency\\EE Finance toy model\\'
 scenario = 'mass.save'#what set of non-intervention params do you want?
-run.name='A' #used to save this set of params for later use/reference, should you desire.
+run='A'#used to save this set of params for later use/reference, should you desire.
+
 
 # load scenario values - ie. everything except gvt intervention specifics
 # scenarios created by scenario-maker.R
@@ -87,7 +88,8 @@ results = bankmodel(inputs)
 # save model run params
 # and outputs
 #--------------------#
-save(list=c('inlist','README','inputs','results','scenario'), file=paste(folder,"model-runs\\",scenario,"-run-",run.name,sep=''))
+run.name=paste(scenario,"-run-",run) 
+save(list=c('inlist','README','inputs','results','scenario','run.name'), file=paste(folder,"model-runs\\",run.name".R",,sep=''))
 
 
 # create some indices for viewing different subsets of the results

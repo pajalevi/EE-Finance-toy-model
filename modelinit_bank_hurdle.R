@@ -13,6 +13,7 @@
 #----------------------------------------------
 
 folder = 'W:\\Research\\Energy Efficiency\\EE Finance toy model\\'
+run.name='longtenor'
 
 #source model contents
 source(paste(folder,'bank_hurdle.R',sep=''))
@@ -20,7 +21,7 @@ source(paste(folder,'bank_hurdle.R',sep=''))
 # source newtons method solver
 source(paste(folder,'newton.solve.R',sep=''))
 
-source(paste(folder,'excel_finance_functions.R',sep='')
+source(paste(folder,'excel_finance_functions.R',sep=''))
 ### loads some pre-made R-copies of excel's finance functions. Thanks, the Internet! ###
 ### included: NPV(rate, values), 
 #             IRR(x, start=0.1), 
@@ -47,7 +48,7 @@ source(paste(folder,'excel_finance_functions.R',sep='')
   #----------------#
   # financing info #
   #----------------#
-    tenor = 10# seq(5,15,by=5)#15 #loan tenor
+    tenor = 100# seq(5,15,by=5)#15 #loan tenor
     # not really in use currently
 #    loan.frac = 1# fraction of eecost covered by loan     
 
@@ -117,6 +118,12 @@ inputs = expand.grid (inlist)
 #--------------------#
 
 results = bankmodel(inputs)
+
+#--------------------#
+# save model run params
+# and outputs
+#--------------------#
+save(list=c('inlist','results','run.name'), file=paste(folder,"model-runs\\",run.name,".R",sep=''))
 
 # create some indices for viewing different subsets of the results
 LLR = results[,"LSR"]>0 & results[,"upfront.rebate"]==0 & results[,"interest.buydown"]==0

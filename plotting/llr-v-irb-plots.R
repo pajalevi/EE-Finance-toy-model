@@ -130,7 +130,7 @@ legend('topleft',
        col=c(1,2),
        bty='n')
 
-title(main="Comparing costs and effects of IRB and LLR",sub=paste("Tenor=10, Project cost=",results[,"eecost"],sep=''))
+title(main="Comparing costs and effects of IRB and LLR",sub=paste("Tenor=",results[,"tenor"],", Project cost=",results[,"eecost"],". RunID:",run.name,sep=''))
 
 #!# TODO: add a subtitle showing the range of expected losses.
 #!# TODO: figureout how to plot the midpoint and range (solid line in center, shaded area / dashed lines around it) to show range
