@@ -86,7 +86,7 @@ bankmodel = function (input) {
 #!# need to think carefully about when to use the risk-free and risky rate
       bank.risk.premium = input$risk.adjust[i]*(1-ev.pmt)
 
-      discount.stream = (1+mo.rate(bank.hurdle + bank.risk.premium))^-k
+      discount.stream = (1+mo.rate(input$bank.hurdle[i] + bank.risk.premium))^-k
       EV.NPV.factor = sum(ev.pmt * discount.stream) # i.e. expected value & NPV conversion
 
       loan.payment = loan.amt / EV.NPV.factor
@@ -134,7 +134,7 @@ bankmodel = function (input) {
     savings.NPV.user = input$savings.yr[i]/input$user.discount[i] * (1 - (1/((1+input$user.discount[i])^(input$tenor[i])))) 
     #print(paste("savings NPV to user:",savings.NPV.user))
     
-    user.NPV = savings.NPV.user + loan.NPV.user + input$upfront.rebate[i] - eecost
+    user.NPV = savings.NPV.user + loan.NPV.user + input$upfront.rebate[i] - input$eecost[i]
 
     #calculate years for a simple payback period
     simple.payback = loan.amt/input$savings.yr[i]

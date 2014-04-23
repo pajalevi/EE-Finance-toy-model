@@ -10,8 +10,24 @@
 #----------------------------------------------
 
 # shortcuts:
-rm(list=ls())
-source('W:/Research/Energy Efficiency/EE Finance toy model/modelinit_bank_hurdle-runA.R')
+# run the model
+  rm(list=ls())
+  source('W:/Research/Energy Efficiency/EE Finance toy model/modelinit_bank_hurdle-runA.R')
+
+# or, load saved model data
+  rm(list=ls())
+  folder = 'W:\\Research\\Energy Efficiency\\EE Finance toy model\\'
+  scenario = 'sensitivityTesting'#what set of non-intervention params do you want?
+  run.name='risk-premia' #used to save this set of params for later use/reference, should you desire.
+  load(file=paste(folder,"model-runs\\",scenario,"-run-",run.name,sep=''))
+    # contains list=c('inlist','README','inputs','results','scenario')
+  # need to re-create indexing variables
+    LLR = results[,"LSR"]>0 & results[,"upfront.rebate"]==0 & results[,"interest.buydown"]==0
+    IRB = results[,"LSR"]==0 & results[,"upfront.rebate"]==0 & results[,"interest.buydown"]>0
+    rebate = results[,"LSR"]==0 & results[,"interest.buydown"]==0
+    nothing = results[,"LSR"]==0 & results[,"upfront.rebate"]==0 & results[,"interest.buydown"]==0
+    no.loss=results[,"chance.full.loss"]==0
+    no.recovery = results[,"recovery"]==0
 
 
 #-------------------------
@@ -128,6 +144,7 @@ title(main="Comparing costs and effects of IRB and LLR",sub=paste("Tenor=10, Pro
 ##################################################################
 # plot the delta in interest rate (LLR-IRB)
 # vs cost to gvt
+#   NONFUNCTIONAL
 
 
 ## first plot low range of expected loss##
@@ -160,6 +177,8 @@ points(y= c(userpmt.means[1,1,1,loss.index], userpmt.means[1,1,1:dim(userpmt.mea
 ####################################################################
 # Trying to do the same thing but with ggplot 2 so that it is 
 # BEAUTIFUL!
+#
+# CURRENTLY NONFUNCTIONAL
 ####################################################################
 library(ggplot2)
 
