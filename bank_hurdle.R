@@ -150,11 +150,11 @@ bankmodel = function (input) {
       
       #-------------------
       # INTEREST RATE BUYDOWN COST
-      # appropriate discount rate is the bank's
-      # b/c it is typically done as an upfront lump sum.
+      # appropriate discount rate is the bank's required interest rate (i.e. discount rate)
+      # b/c IRB is typically done as an upfront lump sum.
       #-------------------
       gvt.contribution = loan.payment-loan.payment.user
-      buydown.NPV.gvt = -1* gvt.contribution/bank.hurdle.mo * (1 - (1/((1+bank.hurdle.mo)^(npmt))))
+      buydown.NPV.gvt = -1* gvt.contribution/interest.rate.mo * (1 - (1/((1+interest.rate.mo)^(npmt))))
 
       #-------------------
       # LOAN LOSS RESERVE COST
