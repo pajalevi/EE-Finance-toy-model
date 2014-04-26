@@ -236,15 +236,17 @@ bankmodel = function (input) {
   #--------------------------------#
   # calculate the monthly rate from yearly 
    mo.rate = function (yr.rate,n=12){
-    #if(yr.rate>1) {stop("yearly rate is greater than 100%, which is breaking the math")}
-    monthly = ((1+yr.rate)^(1/n))-1
-    return(monthly)
-  }
-  
-  #calculate compounded yearly rate from nominal monthly rate
+#     #if(yr.rate>1) {stop("yearly rate is greater than 100%, which is breaking the math")}
+#     monthly = ((1+yr.rate)^(1/n))-1
+#     return(monthly)
+      return(yr.rate/n)
+   }
+#   
+#   #calculate compounded yearly rate from nominal monthly rate
   yr.rate = function (mo.rate, n=12){
-    if(mo.rate>1) {stop("monthly rate is greater than 100%, which is breaking the math")}
-    yearly =((1+mo.rate)^n)-1
-    return(yearly)    
+#     if(mo.rate>1) {stop("monthly rate is greater than 100%, which is breaking the math")}
+#     yearly =((1+mo.rate)^n)-1
+#     return(yearly)    
+    return(mo.rate*n)
   }
-  
+#   
