@@ -82,7 +82,7 @@ yl = c(-1,range(userpmt.means[],na.rm=T)[2])
 par(mar=c(8,4,4,2)+0.1)
 
 plot(y= c(userpmt.means[1,1,1],userpmt.means[2:dim(userpmt.means)[1],,1]), # c() concatenates a singular zero point
-     x= -c(gvt.means[1,1,1], gvt.means[2:dim(userpmt.means)[1],,1]), #start with the LLR (IRB = 0 & LSR != 0)
+     x= -c(gvt.means[1,1,1], gvt.means[2:dim(userpmt.means)[1],,1]), #starts with the IRB
      xlab= "Cost to Government ($)",
      ylab= "Consumer's interest rate (%)",
      pch=1,
@@ -91,7 +91,7 @@ plot(y= c(userpmt.means[1,1,1],userpmt.means[2:dim(userpmt.means)[1],,1]), # c()
      type='l',
      lwd=2)
 
-# now plot points with an LLR and without an IRB
+# now plot points with an IRB and without an LLR
 points(y= c(userpmt.means[1,1,1], userpmt.means[1,1,1:dim(userpmt.means)[3]]), #doesn't matter what sheet we use in 2nd dim since LPCR is irrelevant
        x= -c(gvt.means[1,1,1],gvt.means[1,1,1:dim(userpmt.means)[3]]), 
        pch=4,
@@ -127,3 +127,22 @@ title(sub=paste("Tenor=",results[,"tenor"],", Project cost=",results[,"eecost"],
 #        pch=1)
 #   axis(2,at=1:nrow(sel.sit),labels=paste(sel.sit[,"tenor"],"yrs, ",round(sel.sit[,"interest.user"]*100,3),"%",sep=''))
 #   axis(1)
+
+############################
+# where do the lines intersect?
+
+
+text(labels="-- LPCR = 13.5% \n        IRB = 2.5%",x=((1352+1456)/2)+70,y=5.804+.05, cex=.7, adj = 0, srt = 45)
+
+stop("worked!")
+
+# for current graph, intersects at ~ LPCR=13.5%
+#LLR
+userpmt.means[2:dim(userpmt.means)[1],,1]
+gvt.means[2:dim(userpmt.means)[1],,1]
+
+#IRB - only visible up to 9% buydown
+userpmt.means[1,1,1:dim(userpmt.means)[3]]
+gvt.means[1,1,1:dim(userpmt.means)[3]]
+
+     
