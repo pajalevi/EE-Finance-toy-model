@@ -13,7 +13,7 @@
 #----------------------------------------------
 
 folder = 'W:\\Research\\Energy Efficiency\\EE Finance toy model\\'
-run.name='longtenor'
+scenario = 'sensitivityRiskPremia' #what should this be saved as?
 
 #source model contents
 source(paste(folder,'bank_hurdle.R',sep=''))
@@ -48,7 +48,7 @@ source(paste(folder,'excel_finance_functions.R',sep=''))
   #----------------#
   # financing info #
   #----------------#
-    tenor = 100# seq(5,15,by=5)#15 #loan tenor
+    tenor = 10# seq(5,15,by=5)#15 #loan tenor
     # not really in use currently
 #    loan.frac = 1# fraction of eecost covered by loan     
 

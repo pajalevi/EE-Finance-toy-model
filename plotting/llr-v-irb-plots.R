@@ -12,7 +12,7 @@
 # load saved model data
   rm(list=ls())
   folder = 'W:\\Research\\Energy Efficiency\\EE Finance toy model\\'
-  scenario = 'IRBPlot'#what set of non-intervention params do you want?
+  scenario = 'risky.base'#what set of non-intervention params do you want?
   
 run.name='' #if there are multiple runs using this scenario
   
@@ -86,9 +86,9 @@ plot(y= c(userpmt.means[1,1,1],userpmt.means[2:dim(userpmt.means)[1],,1]), # c()
      xlab= "Cost to Government ($)",
      ylab= "Consumer's interest rate (%)",
      pch=1,
-     col=CPIcolors$Blue,
+     col=CPIcolors$Orange,
      xlim=xl, ylim=yl,
-     type='l',
+     type='o',
      lwd=2)
 
 # now plot points with an IRB and without an LLR
@@ -96,7 +96,7 @@ points(y= c(userpmt.means[1,1,1], userpmt.means[1,1,1:dim(userpmt.means)[3]]), #
        x= -c(gvt.means[1,1,1],gvt.means[1,1,1:dim(userpmt.means)[3]]), 
        pch=4,
        col=CPIcolors$Red,
-       type='l',
+       type='o',
        lwd=2)
 
 #!# somehow not all the lines are connected for IRB line
@@ -111,7 +111,7 @@ legend('topright',
 #                  round(max(results[,"interest.buydown"])*100,digits=6),"%",sep='')),
 #       pch=c(1,4),
         lwd=2,
-       col=c(CPIcolors$Blue,CPIcolors$Red),
+       col=c(CPIcolors$Orange,CPIcolors$Red),
        bty='n')
 
 title(main="Impact of Gov't Spending on IRB and LLR")
@@ -132,9 +132,10 @@ title(sub=paste("Tenor=",results[,"tenor"],", Project cost=",results[,"eecost"],
 # where do the lines intersect?
 
 
-text(labels="-- LPCR = 13.5% \n        IRB = 2.5%",x=((1352+1456)/2)+70,y=5.804+.05, cex=.7, adj = 0, srt = 45)
 
 stop("worked!")
+# for base.case
+text(labels="-- LPCR = 13.5% \n        IRB = 2.5%",x=((1352+1456)/2)+70,y=5.804+.05, cex=.7, adj = 0, srt = 45)
 
 # for current graph, intersects at ~ LPCR=13.5%
 #LLR
