@@ -76,10 +76,10 @@ userpmt.means=interest.means
 #plot up interest rate/monthly payment vs cost to gvt
 # for irb and llr
 #############################################
-xl = -range(gvt.means[],na.rm=T)[c(2,1)] #flip-flop x axis direction
-yl = c(-1,range(userpmt.means[],na.rm=T)[2])
+xl = c(0,-range(gvt.means[],na.rm=T)[1]) #flip-flop x axis direction
+yl = c(0,range(userpmt.means[],na.rm=T)[2]+1)
 
-par(mar=c(8,4,4,2)+0.1)
+par(mar=c(8,4,4,2)+0.1, xaxs="i", yaxs="i")
 
 plot(y= c(userpmt.means[1,1,1],userpmt.means[2:dim(userpmt.means)[1],,1]), # c() concatenates a singular zero point
      x= -c(gvt.means[1,1,1], gvt.means[2:dim(userpmt.means)[1],,1]), #starts with the IRB
@@ -88,16 +88,19 @@ plot(y= c(userpmt.means[1,1,1],userpmt.means[2:dim(userpmt.means)[1],,1]), # c()
      pch=1,
      col=CPIcolors$Orange,
      xlim=xl, ylim=yl,
-     type='o',
-     lwd=2)
+     type='l',
+     lwd=2,
+     axes=F)
 
 # now plot points with an IRB and without an LLR
 points(y= c(userpmt.means[1,1,1], userpmt.means[1,1,1:dim(userpmt.means)[3]]), #doesn't matter what sheet we use in 2nd dim since LPCR is irrelevant
        x= -c(gvt.means[1,1,1],gvt.means[1,1,1:dim(userpmt.means)[3]]), 
        pch=4,
        col=CPIcolors$Red,
-       type='o',
+       type='l',
        lwd=2)
+axis(side=1, at=seq(from=xl[1],to=xl[2],by=1000))
+axis(side=2, at=seq(from=yl[1],to=yl[2],by=2))
 
 #!# somehow not all the lines are connected for IRB line
 
@@ -114,10 +117,10 @@ legend('topright',
        col=c(CPIcolors$Orange,CPIcolors$Red),
        bty='n')
 
-title(main="Impact of Gov't Spending on IRB and LLR")
-title(sub=paste("Tenor=",results[,"tenor"],", Project cost=",results[,"eecost"],". Expected loss:",round(max(results[,"expected.loss.pct"]),digits=4)*100,"%",
-                ".\n RunID:",scenario,sep=''),
-      line=5)
+title(main="Impact of Gov't Spending via IRB and LLR")
+# title(sub=paste("Tenor=",results[,"tenor"],", Project cost=",results[,"eecost"],". Expected loss:",round(max(results[,"expected.loss.pct"]),digits=4)*100,"%",
+#                 ".\n RunID:",scenario,sep=''),
+#       line=5)
 
 #!# TODO: add a subtitle showing the range of expected losses.
 #!# TODO: figureout how to plot the midpoint and range (solid line in center, shaded area / dashed lines around it) to show range
@@ -133,10 +136,10 @@ title(sub=paste("Tenor=",results[,"tenor"],", Project cost=",results[,"eecost"],
 
 
 
-stop("worked!")
-# for base.case
-text(labels="-- LPCR = 13.5% \n        IRB = 2.5%",x=((1352+1456)/2)+70,y=5.804+.05, cex=.7, adj = 0, srt = 45)
 
+# for base.case
+text(labels="-- LPCR = 31.5 % \n        IRB = 7 %",x=(3300)+70,y=6.8791+.05, cex=.7, adj = 0, srt = 45)
+stop("worked!")
 # for current graph, intersects at ~ LPCR=13.5%
 #LLR
 userpmt.means[2:dim(userpmt.means)[1],,1]
