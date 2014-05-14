@@ -17,7 +17,7 @@
 #-------------------------
   rm(list=ls())
   folder = 'W:\\Research\\Energy Efficiency\\EE Finance toy model\\'
-  scenario = 'risky.base'#what set of non-intervention params do you want?
+  scenario = 'risk.range.base'#what set of non-intervention params do you want?
   
   run.name='' #if there are multiple runs using this scenario
   
@@ -44,8 +44,8 @@
 #--------------------------
    
   # tapply: finding the measn/sd of a given column for each unique combination of the factors in INDEX
-  gvt.means = tapply(results[,"gvt.cost.NPV"],INDEX=results[,c("LSR","LPCR","interest.buydown","risk.adjust")], FUN=mean)
-  interest.means = tapply(results[,"interest.user"],INDEX=results[,c("LSR","LPCR","interest.buydown","risk.adjust")], FUN=mean)
+  gvt.means = tapply(results[,"gvt.cost.NPV"],INDEX=results[,c("LSR","LPCR","interest.buydown","chance.full.loss")], FUN=mean)
+  interest.means = tapply(results[,"interest.user"],INDEX=results[,c("LSR","LPCR","interest.buydown","chance.full.loss")], FUN=mean)
   
   # dim 1 is LSR
   # dim 2 is LPCR
@@ -69,20 +69,30 @@
 # Make vectors of data to fit lines to
 #--------------------------
 
-###FLIP FLOR IRB AND LLR###
   llr=list()
-  llr$x=c(gvt.means[1,1,1,loss.index], gvt.means[2:dim(interest.means)[1],,1,loss.index])
-  llr$y=c(interest.means[1,1,1,loss.index],interest.means[2:dim(interest.means)[1],,1,loss.index])
+  llr$x=-c(gvt.means[2:dim(interest.means)[1],,1,loss.index])
+  llr$y=c(interest.means[2:dim(interest.means)[1],,1,loss.index])
 
   irb=list()
-  irb$x=c(gvt.means[1,1,1,loss.index],gvt.means[1,1,1:dim(interest.means)[3],loss.index])
-  irb$y=c(interest.means[1,1,1,loss.index], interest.means[1,1,1:dim(interest.means)[3],loss.index])
+  irb$x=-c(gvt.means[1,1,1:dim(interest.means)[3],loss.index])
+  irb$y=c(interest.means[1,1,1:dim(interest.means)[3],loss.index])
 
 #--------------------------
 # fit a polynomial model to IRB
 #--------------------------
 
 #use nls()
+  # starting params
+  irby=irb$y[1:9]
+  irbx=irb$x[1:9]
+  p0 = -100
+  p1 = 1
+  p2= 1
+  irb.model=nls(irby ~ p0*irbx + p1*(irbx^2) + p2 , start=list(p0=p0,p1=p1,p2=p2))
+#summary(irb.model)
+
+# plot(irbx,irby)
+# lines(irbx, predict(irb.model, irbx),col="blue")
 
 #--------------------------
 # Make a two-part linear fit to LLR
@@ -90,26 +100,73 @@
 
   #--------------------------
   # Find top half of line end
-  h = min(llr$y)
-  top = which(llr$y != h)
-  bottom = which(llr$y == h)
+    h = min(llr$y)
+    top = which(llr$y != h)
+    bottom = which(llr$y == h)
 
   #--------------------------
   # linear fit to top half of line
-    toplm=lm(formula=rev(llr$y[top])~rev(-llr$x[top]))
+      topy=llr$y[top]
+      topx=llr$x[top]
+    toplm=lm(topy~topx)#lm(formula=rev(llr$y[top])~rev(-llr$x[top]))
     #abline(toplm)
-  
+
+
   #--------------------------
   # bottom half of line (horizontal)
     #need to find x coords of beginning/end
-  
+    bottom.start=c(x=llr$x[bottom][1], y=llr$y[bottom][1]) #this is ~ the corner
+    bottom.end=c(x=llr$x[bottom][length(bottom)], y=llr$y[bottom][length(bottom)])
+
+  #-------------------------
+  # find where the llr lines intersect
+    topcoef=coef(toplm)
+    #topexpr <- expression(topcoef[2]*x + topcoef[1])
+    top.inv.expr <- expression((y-topcoef[1])/topcoef[2])
+
+    corner=c(x=eval(top.inv.expr, list(y=h))[1], y=h)
+
 #--------------------------
 # Find the difference between the fits
 #--------------------------
+#these are dummy points along which to evaluate the difference
+bottom.x = seq(corner[1], bottom.end[1], length.out=50)
+top.x=seq(0,corner[1],length.out=30) 
 
+topDiff = predict(irb.model,newdata=data.frame(irbx=top.x)) - predict(toplm,newdata=data.frame(topx=top.x))
+  
+  bottomDiff = predict(irb.model, newdata=data.frame(irbx=bottom.x))- h 
 
 #--------------------------
 # Plot the difference
 #--------------------------
 #load CPI colors
 load(file=paste(folder,"CPIcolors.R",sep=''))
+
+#--------------------------
+#testing by putting plots one and two together
+#--------------------------
+plot(irbx,irby)
+points(llr$x, llr$y)
+
+#bottomdiff
+lines(bottom.x, bottomDiff, col=2)
+lines(top.x,topDiff,col=3)
+
+#add line fits
+lines(irbx, predict(irb.model, irbx),col="blue") #irb fit
+lines(top.x,predict(toplm,data.frame(topx=top.x)),col="red")#sloped llr line
+lines(bottom.x,rep(h,times=length(bottom.x)),col="red")#flat llr line
+
+#make sure the crosses happen in the right places
+abline(v=corner[1],col="grey")
+abline(v=mean(bottom.x[c(10,11)]), col="grey") #these are manually picked indices from bottom.x, corresponding to where bottomDiff crosses 0
+abline(h=0); abline(v=0)
+
+#------------------
+# make the real plot
+#------------------
+# may require function-ing the calculations done above
+plot(bottom.x, bottomDiff, col=CPIcolors$Red,type='l',xlim=c(0,4000), ylim=c(-4,4))
+lines(top.x,topDiff,col=CPIcolors$Red)
+abline(h=0)
