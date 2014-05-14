@@ -25,7 +25,7 @@
 #---------------------------------- #
 
 folder = 'W:\\Research\\Energy Efficiency\\EE Finance toy model\\'
-scenario = 'risky.base' #what set of params do you want?
+scenario = 'risk.range.base' #what set of params do you want?
 
 run='' #used to uniquely identify this run, if the scenario is used multiple times.
 
