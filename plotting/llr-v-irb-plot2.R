@@ -64,18 +64,22 @@
 # There are different loss rates available to plot
 # let's pick one
 #--------------------------
-  loss.index=1
+  loss.index=7
 #--------------------------
 # Make vectors of data to fit lines to
 #--------------------------
 
-  llr=list()
-  llr$x=-c(gvt.means[2:dim(interest.means)[1],,1,loss.index])
-  llr$y=c(interest.means[2:dim(interest.means)[1],,1,loss.index])
+##################Begin Function ###################
+#make.regressions= function(){
+####################################################
 
-  irb=list()
-  irb$x=-c(gvt.means[1,1,1:dim(interest.means)[3],loss.index])
-  irb$y=c(interest.means[1,1,1:dim(interest.means)[3],loss.index])
+  llr<-list()
+  llr$x<--c(gvt.means[2:dim(interest.means)[1],,1,loss.index])
+  llr$y<-c(interest.means[2:dim(interest.means)[1],,1,loss.index])
+
+  irb<-list()
+  irb$x<--c(gvt.means[1,1,1:dim(interest.means)[3],loss.index])
+  irb$y<-c(interest.means[1,1,1:dim(interest.means)[3],loss.index])
 
 #--------------------------
 # fit a polynomial model to IRB
@@ -83,12 +87,12 @@
 
 #use nls()
   # starting params
-  irby=irb$y[1:9]
-  irbx=irb$x[1:9]
-  p0 = -100
-  p1 = 1
-  p2= 1
-  irb.model=nls(irby ~ p0*irbx + p1*(irbx^2) + p2 , start=list(p0=p0,p1=p1,p2=p2))
+  irby<-irb$y[1:9]
+  irbx<-irb$x[1:9]
+  p0 <- -100
+  p1 <- 1
+  p2<- 1
+  irb.model<-nls(irby ~ p0*irbx + p1*(irbx^2) + p2 , start=list(p0=p0,p1=p1,p2=p2))
 #summary(irb.model)
 
 # plot(irbx,irby)
@@ -100,48 +104,72 @@
 
   #--------------------------
   # Find top half of line end
-    h = min(llr$y)
-    top = which(llr$y != h)
-    bottom = which(llr$y == h)
+    h <- min(llr$y)
+    top <- which(llr$y != h)
+    bottom <- which(llr$y == h)
 
   #--------------------------
   # linear fit to top half of line
-      topy=llr$y[top]
-      topx=llr$x[top]
-    toplm=lm(topy~topx)#lm(formula=rev(llr$y[top])~rev(-llr$x[top]))
+      topy<-llr$y[top]
+      topx<-llr$x[top]
+    toplm<-lm(topy~topx)#lm(formula=rev(llr$y[top])~rev(-llr$x[top]))
     #abline(toplm)
 
 
   #--------------------------
   # bottom half of line (horizontal)
     #need to find x coords of beginning/end
-    bottom.start=c(x=llr$x[bottom][1], y=llr$y[bottom][1]) #this is ~ the corner
-    bottom.end=c(x=llr$x[bottom][length(bottom)], y=llr$y[bottom][length(bottom)])
+    bottom.start<-c(x=llr$x[bottom][1], y=llr$y[bottom][1]) #this is ~ the corner
+    bottom.end<-c(x=llr$x[bottom][length(bottom)], y=llr$y[bottom][length(bottom)])
 
   #-------------------------
   # find where the llr lines intersect
-    topcoef=coef(toplm)
+    topcoef<-coef(toplm)
     #topexpr <- expression(topcoef[2]*x + topcoef[1])
     top.inv.expr <- expression((y-topcoef[1])/topcoef[2])
 
-    corner=c(x=eval(top.inv.expr, list(y=h))[1], y=h)
+    corner<-c(x=eval(top.inv.expr, list(y=h))[1], y=h)
 
 #--------------------------
 # Find the difference between the fits
 #--------------------------
 #these are dummy points along which to evaluate the difference
-bottom.x = seq(corner[1], bottom.end[1], length.out=50)
-top.x=seq(0,corner[1],length.out=30) 
-
-topDiff = predict(irb.model,newdata=data.frame(irbx=top.x)) - predict(toplm,newdata=data.frame(topx=top.x))
+  bottom.x <- seq(corner[1], bottom.end[1], length.out=50)
+  top.x<-seq(0,corner[1],length.out=30) 
   
-  bottomDiff = predict(irb.model, newdata=data.frame(irbx=bottom.x))- h 
+
+  # using assign to set the values of these two variables will allow us to access these variables from the global envir
+  # without having to return them 
+  assign("topDiff", predict(irb.model,newdata=data.frame(irbx=top.x)) - predict(toplm,newdata=data.frame(topx=top.x)), envir = .GlobalEnv)
+  
+  assign("bottomDiff", predict(irb.model, newdata=data.frame(irbx=bottom.x))- h, envir = .GlobalEnv)
+
+###################################################
+#} ##### End Function make.regressions #############
+###################################################
+#stop()
+#-------------------------
+# Call the function
+#-------------------------
+#make.regressions()
 
 #--------------------------
 # Plot the difference
 #--------------------------
 #load CPI colors
 load(file=paste(folder,"CPIcolors.R",sep=''))
+
+#------------------
+# make the real plot
+#------------------
+# may require function-ing the calculations done above
+plot(bottom.x, bottomDiff, col=CPIcolors$Red,type='l',xlim=c(0,4000), ylim=c(-4,4))
+lines(top.x,topDiff,col=CPIcolors$Red)
+abline(h=0)
+
+lines(bottom.x, bottomDiff, col=CPIcolors$DarkGrey,type='l',xlim=c(0,4000), ylim=c(-4,4))
+lines(top.x,topDiff,col=CPIcolors$DarkGrey)
+
 
 #--------------------------
 #testing by putting plots one and two together
@@ -163,10 +191,3 @@ abline(v=corner[1],col="grey")
 abline(v=mean(bottom.x[c(10,11)]), col="grey") #these are manually picked indices from bottom.x, corresponding to where bottomDiff crosses 0
 abline(h=0); abline(v=0)
 
-#------------------
-# make the real plot
-#------------------
-# may require function-ing the calculations done above
-plot(bottom.x, bottomDiff, col=CPIcolors$Red,type='l',xlim=c(0,4000), ylim=c(-4,4))
-lines(top.x,topDiff,col=CPIcolors$Red)
-abline(h=0)
