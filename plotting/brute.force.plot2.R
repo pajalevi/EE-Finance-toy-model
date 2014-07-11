@@ -7,7 +7,7 @@ rm(list=ls())
 folder = 'W:\\Research\\Energy Efficiency\\EE Finance toy model\\'
 scenario = 'risk.range.base'#what set of non-intervention params do you want?
 
-run.name='' #if there are multiple runs using this scenario
+run.name='.newPremia' #if there are multiple runs using this scenario
 
 load(file=paste(folder,"model-runs\\",scenario,run.name,".R",sep=''))
 # contains list=c('inlist','README','inputs','results','scenario')
@@ -132,10 +132,10 @@ load(file=paste(folder,"CPIcolors.R",sep=''))
 # make the real plot
 #------------------
 # may require function-ing the calculations done above"
-plot(bottom.x, bottomDiff, col='black',type='l',xlim=c(0,4000), ylim=c(-4,4),xlab="Cost to Government",
+plot(bottom.x, bottomDiff, col='black',type='l',xlim=c(0,4000), ylim=c(-4,12),xlab="Cost to Government",
      ylab="User interest rate difference (LLR - IRB)",lwd=2)
 title(main="When does an LLR reduce user interest rates \n more efficiently than an IRB?", sub = "Positive y-values indicate an LLR is more cost-effective")
-legend('bottomleft', fill=c('black', CPIcolors$DarkGrey, CPIcolors$Red), legend=c("25% chance of default","10% chance of default", "40% chance of default"),bty='n')
+legend('bottomleft', fill=c( CPIcolors$DarkGrey,'black', CPIcolors$Red), legend=c("10% chance of default","25% chance of default", "40% chance of default"),bty='n')
 lines(top.x,topDiff,col='black',lwd=2)
 abline(h=0)
 

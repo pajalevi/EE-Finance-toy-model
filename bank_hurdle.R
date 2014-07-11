@@ -66,7 +66,7 @@ bankmodel = function (input) {
 #!# I HAVE NO IDEA IF THIS IS CORRECT IN ANY WAY
         small.LLR = 1
         if (input$LPCR[i] < expected.loss.noLLR){ 
-          warning("LPCR is less than expected loss! The pool will be exhausted!") 
+          #warning("LPCR is less than expected loss! The pool will be exhausted!") 
           small.LLR = input$LPCR[i] / expected.loss.noLLR
         }
       

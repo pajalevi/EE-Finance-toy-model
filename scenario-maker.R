@@ -10,10 +10,10 @@
 # where to save this scenario? 
 #-------------------------------
 folder = 'W:\\Research\\Energy Efficiency\\EE Finance toy model\\scenarios\\'
-scenario = 'risk.range.base'
+scenario = 'lowRisk.newPremia'
 
 #describe what this scenario is for
-README= "base case with a range of consumer default risks"
+README= "low-risk base case"
 
 #----------------------------------------------
 # NB: any of the initial settings can be single numbers

@@ -12,7 +12,7 @@
 # load saved model data
   rm(list=ls())
   folder = 'W:\\Research\\Energy Efficiency\\EE Finance toy model\\'
-  scenario = 'risky.base'#what set of non-intervention params do you want?
+  scenario = 'lowRisk.newPremia'#what set of non-intervention params do you want?
   
 run.name='' #if there are multiple runs using this scenario
   
@@ -76,7 +76,7 @@ userpmt.means=interest.means
 #plot up interest rate/monthly payment vs cost to gvt
 # for irb and llr
 #############################################
-xl = c(0,-range(gvt.means[],na.rm=T)[1]) #flip-flop x axis direction
+xl = c(0,-range(gvt.means[],na.rm=T)[1]-4000) #flip-flop x axis direction
 yl = c(0,range(userpmt.means[],na.rm=T)[2]+1)
 
 par(mar=c(8,4,4,2)+0.1, xaxs="i", yaxs="i")
@@ -118,9 +118,9 @@ legend('topright',
        bty='n')
 
 title(main="Impact of Gov't Spending via IRB and LLR")
-# title(sub=paste("Tenor=",results[,"tenor"],", Project cost=",results[,"eecost"],". Expected loss:",round(max(results[,"expected.loss.pct"]),digits=4)*100,"%",
-#                 ".\n RunID:",scenario,sep=''),
-#       line=5)
+ title(sub=paste("Tenor=",results[,"tenor"],", Project cost=",results[,"eecost"],". Expected loss:",round(max(results[,"expected.loss.pct"]),digits=4)*100,"%",
+                 ".\n RunID:",scenario,run.name,sep=''),
+       line=5)
 
 #!# TODO: add a subtitle showing the range of expected losses.
 #!# TODO: figureout how to plot the midpoint and range (solid line in center, shaded area / dashed lines around it) to show range
@@ -136,10 +136,10 @@ title(main="Impact of Gov't Spending via IRB and LLR")
 
 
 
+stop("worked!")
 
 # for base.case
 text(labels="-- LPCR = 31.5 % \n        IRB = 7 %",x=(3300)+70,y=6.8791+.05, cex=.7, adj = 0, srt = 45)
-stop("worked!")
 # for current graph, intersects at ~ LPCR=13.5%
 #LLR
 userpmt.means[2:dim(userpmt.means)[1],,1]
