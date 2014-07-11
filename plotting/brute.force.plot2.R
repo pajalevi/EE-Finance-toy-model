@@ -1,11 +1,11 @@
-
+# from llr-v-irb-plot2.R
 
 #-------------------------
 # load saved model data
 #-------------------------
 rm(list=ls())
 folder = 'W:\\Research\\Energy Efficiency\\EE Finance toy model\\'
-scenario = 'risk.range.base'#what set of non-intervention params do you want?
+scenario = 'risky.base'#what set of non-intervention params do you want?
 
 run.name='.newPremia' #if there are multiple runs using this scenario
 
