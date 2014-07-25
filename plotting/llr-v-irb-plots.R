@@ -14,7 +14,7 @@
   folder = 'W:\\Research\\Energy Efficiency\\EE Finance toy model\\'
   scenario = 'lowRisk.newPremia'#what set of non-intervention params do you want?
   
-run.name='' #if there are multiple runs using this scenario
+run.name='-premiaSensitivity' #if there are multiple runs using this scenario
   
 load(file=paste(folder,"model-runs\\",scenario,run.name,".R",sep=''))
     # contains list=c('inlist','README','inputs','results','scenario')

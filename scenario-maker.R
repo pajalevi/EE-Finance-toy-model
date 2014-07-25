@@ -10,10 +10,10 @@
 # where to save this scenario? 
 #-------------------------------
 folder = 'W:\\Research\\Energy Efficiency\\EE Finance toy model\\scenarios\\'
-scenario = 'lowRisk.newPremia'
+scenario = 'highRisk.newPremia'
 
 #describe what this scenario is for
-README= "low-risk base case"
+README= "high-risk base case"
 
 #----------------------------------------------
 # NB: any of the initial settings can be single numbers
@@ -44,10 +44,10 @@ gvt.discount = .04#seq(.01,.05,by=.01)
 #------------#
 # risky info #
 #------------#
-risk.adjust =1.4 # as in (Amato, J., 2005) this number is used as follows
+risk.adjust =.4 # as in (Amato, J., 2005) this number is used as follows
 #!#                 # additional return (basis pts) required to compensate for risk = expected loss(i.e. 1-ev.pmt) * risk.adjust
 # same source gives the .4 number
-chance.full.loss = seq(.10,.405,by=.05) # i.e. chance of defaulting by end of loan tenor. 13% ~= 4% expected loss, .3 ~= 9% loss
+chance.full.loss = .15 # i.e. chance of defaulting by end of loan tenor. 13% ~= 4% expected loss, .3 ~= 9% loss
 recovery = .4 #pct of loan that is recovered on default
 
 #-------------------#
