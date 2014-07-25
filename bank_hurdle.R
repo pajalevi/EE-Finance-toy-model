@@ -43,11 +43,12 @@ bankmodel = function (input) {
     # given bank NPV = 0       #
     #--------------------------#
       
-      #-----------------#
-      # find P(default) and then the probability that the bank gets 
-      # paid by either the bank or the LLR (= ev.pmt)
-      # since this is expected value, I can treat LSR (the fraction the bank must pay) as a proability
-      #-----------------#
+      #-------------------------------------------------------------#
+      # find P(default) and then the probability that the bank gets # 
+      # paid by either the bank or the LLR (= ev.pmt)               #
+      # since this is expected value, I can treat LSR               #
+      # (the fraction the bank must pay) as a proability            #
+      #-------------------------------------------------------------#
       k = seq(1,npmt,by=1)
     
       ## calclate p(d) ##
@@ -63,26 +64,27 @@ bankmodel = function (input) {
       
       # loan pool coverage ratio (LPCR) - if expected.loss > LPCR --> problems!
       # Attempt to factor this in the the small.LLR adjustment
-#!# I HAVE NO IDEA IF THIS IS CORRECT IN ANY WAY
+#!# small.LLR is the fraction of the expected loss that the LLR will cover. it is used to adjust LSR
+#!# this is a kind of clunky way to represent undersized LLR
         small.LLR = 1
         if (input$LPCR[i] < expected.loss.noLLR){ 
           #warning("LPCR is less than expected loss! The pool will be exhausted!") 
           small.LLR = input$LPCR[i] / expected.loss.noLLR
         }
       
-      #expected value of payment = P(no defaults) + P(LLR OR (Loan Security/Recovery) pays bank AND the user defaults)
-      ev.pmt = no.default.chance + ((1-no.default.chance) * (1-(1-input$recovery[i]) *(1-(input$LSR[i]* small.LLR))))
-        # ASSUMPTION: if recovery is 40%, and LSR is 80%, gvt makes bank whole for 80% of outstanding balance [leaving the bank with 12% loss]
+      # expected value of payment = P(no defaults) + P(LLR OR (Loan Security/Recovery) pays bank AND the user defaults)
+     ev.pmt = no.default.chance + ((1-no.default.chance) * (1-(1-input$recovery[i]) *(1-(input$LSR[i]* small.LLR))))
+#!#      # ASSUMPTION: if recovery is 40%, and LSR is 80%, gvt makes bank whole for 80% of outstanding balance [leaving the bank with 12% loss] (pari passu)
               # Credit Enhancement Overview Guide wording: 
               # LSR = "the percentage of a lender's loss on each customer default that they can recover." 
           
-      #-------------------#
+      #---------------------------#
       # find Loan Payment to bank #
-      #-------------------#
-      ## calculate conversion factor from PV to loan payment ##
-      ## from k=1 to =n, Sum of (1-(1-p(d))^k)(1+bank hurdle rate)^-k
-#!# Add, to hurdle rate in this case, (1-ev.pmt)* risk.premium.factor
-#!# but you wouldn't use that addition to discount the IRB payments, for example.
+      #---------------------------#
+      # calculate conversion factor from PV to loan payment 
+      # from k=1 to =n, Sum of (1-(1-p(d))^k)(1+bank hurdle rate)^-k
+#!# Add, to hurdle rate in this case, (1-ev.pmt)* risk.premium.factor to account for risk
+#!# but you wouldn't use that risky discount rate to calculate IRB payments, for example.
 #!# need to think carefully about when to use the risk-free and risky rate
       bank.risk.premium = input$risk.adjust[i]*(1-ev.pmt)
 
@@ -92,26 +94,29 @@ bankmodel = function (input) {
       loan.payment = loan.amt / EV.NPV.factor
   
 
-      #----------------------------------#
+      #---------------------------------------#
       # solve for interest rate given to bank
       # given loan.payment & PV=loan.amt
-      # loan.payment = (interest.rate * loan.amt)/(1-(1+interest.rate)^-n)
+      # loan.payment = 
+      #     (interest.rate * loan.amt)/(1-(1+interest.rate)^-n)
       # use newton.solve.R   
-      #----------------------------------#
+      #---------------------------------------#
       fx = expression(((x * loan.amt)/(1-(1+x)^-npmt))-loan.payment)
       interest.rate.mo = tail(newton.solve(f=fx,loan.amt=loan.amt, loan.payment=loan.payment,npmt=npmt),n=1)
       interest.rate = yr.rate(interest.rate.mo)
       
       
-    #------------------------------#
-    # Calculate user interest rate, 
-    # loan payment, (would differ w/ interest rate buydown)
-    # and net present value #
-    # account for interest-rate buydown, upfront rebate
-    #------------------------------#
+    #-------------------------------------------#
+    # Calculate user interest rate,             #
+    # loan payment, (would differ w/ interest   #
+    # rate buydown), and net present value,     #
+    # account for interest-rate buydown,        #
+    # upfront rebate                            #
+    #-------------------------------------------#
 
     # disallow interest rate buydowns that would result in a negative interest rate for the user
-#!# This might be messing with the linearity of our graphs...
+#!# This might mess with the linearity of our graphs...
+#!# comment out the else block (and the if/else lines) to allow negative interest rates
 #    if(interest.rate - input$interest.buydown[i] >= 0){
       interest.user = interest.rate - input$interest.buydown[i]
 #    } else {
@@ -143,9 +148,9 @@ bankmodel = function (input) {
     # Calculate cost to government #
     #------------------------------#
 
-      #-----------------#
-      # find loan.loss reserve size
-      #-----------------#
+      #-----------------------------#
+      # find loan.loss reserve size #
+      #-----------------------------#
       reserve.size = loan.amt * input$LSR[i] * input$LPCR[i]
       
       #-------------------

@@ -27,7 +27,7 @@
 folder = 'W:\\Research\\Energy Efficiency\\EE Finance toy model\\'
 scenario = 'lowRisk.newPremia' #what set of params do you want?
 
-run='' #used to uniquely identify this run, if the scenario is used multiple times.
+run='-premiaSensitivity' #used to uniquely identify this run, if the scenario is used multiple times.
 
 #source model code
 source(paste(folder,'bank_hurdle.R',sep=''))
@@ -81,7 +81,7 @@ load(paste(folder,'scenarios\\',scenario,".R",sep=''))
   #------------#
   # risky info #
   #------------#
-      inlist$risk.adjust =1.4#c(.3,.4,.5) # as in (Amato, J., 2005) this number is used as follows
+      inlist$risk.adjust =seq(.5,2,by=.5) # as in (Amato, J., 2005) this number is used as follows
 #!#                 # additional return (basis pts) required to compensate for risk = expected loss(i.e. 1-ev.pmt) * risk.adjust
     # same source gives the .4 number
      inlist$chance.full.loss = .05#seq(.05,.3,by=.05) # i.e. chance of defaulting by end of loan tenor. 13% ~= 4% expected loss
